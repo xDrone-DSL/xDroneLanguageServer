@@ -1,7 +1,9 @@
 import logging
 import unittest
 
-from xdrone import DroneConfig, ConfigParser, SafetyConfig, DefaultDroneConfig
+from xdrone.config_parsers.config_parser import ConfigParser
+from xdrone.shared.drone_config import DroneConfig, DefaultDroneConfig
+from xdrone.shared.safety_config import SafetyConfig
 
 
 class ConfigParserTest(unittest.TestCase):

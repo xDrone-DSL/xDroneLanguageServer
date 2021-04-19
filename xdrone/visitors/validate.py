@@ -1,6 +1,6 @@
-from logging import info
-from lark import Visitor
 from math import cos, sin, pi, radians
+
+from lark import Visitor
 
 
 def toFloat(tree):
@@ -40,12 +40,12 @@ class Validate(Visitor):
     def left(self, tree):
         duration = toFloat(tree)
 
-        self.travel(self.direction + pi/2, duration)
+        self.travel(self.direction + pi / 2, duration)
 
     def right(self, tree):
         duration = toFloat(tree)
 
-        self.travel(self.direction - pi/2, duration)
+        self.travel(self.direction - pi / 2, duration)
 
     def forward(self, tree):
         duration = toFloat(tree)

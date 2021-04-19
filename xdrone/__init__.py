@@ -2,19 +2,17 @@ import antlr4
 
 from antlr.xDroneLexer import xDroneLexer, CommonTokenStream
 from antlr.xDroneParser import xDroneParser
+from xdrone.compiler.compiler import Compiler
+from xdrone.compiler.compiler_utils.error_listener import ParserErrorListener
+from xdrone.compiler.compiler_utils.functions import FunctionTable
+from xdrone.compiler.compiler_utils.symbol_table import SymbolTable
 from xdrone.config_parsers.config_parser import ConfigParser
-from xdrone.visitors.compiler_utils.command import Command
-from xdrone.visitors.compiler_utils.compile_error import XDroneSyntaxError
-from xdrone.visitors.compiler_utils.error_listener import ParserErrorListener
-from xdrone.visitors.compiler_utils.functions import FunctionTable
-from xdrone.visitors.compiler_utils.symbol_table import SymbolTable
-from xdrone.visitors.compiler_utils.type_hints import NestedCommands
+from xdrone.safety_checker.safety_checker import SafetyChecker
+from xdrone.shared.compile_error import XDroneSyntaxError
+from xdrone.shared.drone_config import DefaultDroneConfig
+from xdrone.shared.safety_config import SafetyConfig
+from xdrone.state_updaters.state_updater import StateUpdater
 from xdrone.visitors.fly import Fly
-from xdrone.visitors.interpreter import Interpreter
-from xdrone.visitors.state_safety_checker.drone_config import DroneConfig, DefaultDroneConfig
-from xdrone.visitors.state_safety_checker.safety_checker import SafetyChecker
-from xdrone.visitors.state_safety_checker.safety_config import SafetyConfig
-from xdrone.visitors.state_safety_checker.state_updater import StateUpdater
 from xdrone.visitors.validate import Validate
 
 
@@ -66,7 +64,7 @@ def generate_commands(program, state_updater: StateUpdater = None, safety_checke
 
     tree = _parse_program(program)
 
-    commands, states = Interpreter(state_updater, symbol_table, function_table).visit(tree)
+    commands, states = Compiler(state_updater, symbol_table, function_table).visit(tree)
 
     safety_checker.check(commands, states)
 

@@ -1,9 +1,13 @@
 import unittest
 
-from xdrone import generate_commands, SafetyChecker, SafetyConfig, DroneConfig, StateUpdater
-from xdrone.visitors.compiler_utils.command import Command
-from xdrone.visitors.compiler_utils.compile_error import CompileError, XDroneSyntaxError
-from xdrone.visitors.state_safety_checker.safety_check_error import SafetyCheckError
+from xdrone import generate_commands
+from xdrone.shared.compile_error import CompileError, XDroneSyntaxError
+from xdrone.shared.command import Command
+from xdrone.shared.drone_config import DroneConfig
+from xdrone.shared.safety_config import SafetyConfig
+from xdrone.shared.safety_check_error import SafetyCheckError
+from xdrone.safety_checker.safety_checker import SafetyChecker
+from xdrone.state_updaters.state_updater import StateUpdater
 
 
 class GenerateCommandsTest(unittest.TestCase):

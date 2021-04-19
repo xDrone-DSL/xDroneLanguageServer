@@ -1,8 +1,8 @@
 import json
 from logging import warning
 
-from xdrone.visitors.state_safety_checker.drone_config import DroneConfig, DefaultDroneConfig
-from xdrone.visitors.state_safety_checker.safety_config import SafetyConfig
+from xdrone.shared.drone_config import DroneConfig, DefaultDroneConfig
+from xdrone.shared.safety_config import SafetyConfig
 
 
 class ConfigParser:

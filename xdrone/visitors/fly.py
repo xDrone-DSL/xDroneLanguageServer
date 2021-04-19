@@ -1,7 +1,8 @@
 from logging import info
+from math import floor, pi, sin, cos, radians
+
 from lark import Visitor
 from pyparrot.Minidrone import Mambo
-from math import floor, pi, sin, cos, radians
 
 TAKE_OFF_HEIGHT = 83
 HORIZONTAL_CALIBRATION = 35
@@ -30,7 +31,7 @@ class Fly(Visitor):
         success = self.mambo.connect(num_retries=3)
         info("Connected: %s" % success)
 
-    def __del__ (self):
+    def __del__(self):
         info("Disconnecting")
         self.mambo.safe_land(5)
         self.mambo.disconnect()
@@ -53,7 +54,7 @@ class Fly(Visitor):
 
     def up(self, tree):
         duration = toFloat(tree)
-        
+
         self.mambo.fly_direct(roll=0, pitch=0, yaw=0, vertical_movement=10, duration=duration)
         self.mambo.smart_sleep(2)
 
@@ -61,10 +62,10 @@ class Fly(Visitor):
 
     def down(self, tree):
         duration = toFloat(tree)
-        
+
         self.mambo.fly_direct(roll=0, pitch=0, yaw=0, vertical_movement=-10, duration=duration)
         self.mambo.smart_sleep(2)
-        
+
         self.y -= VERTICAL_CALIBRATION * duration
 
     def move_in_steps(self, roll, pitch, yaw, v_m, duration):
@@ -83,8 +84,8 @@ class Fly(Visitor):
                            yaw=0,
                            v_m=0,
                            duration=duration)
-        self.x += HORIZONTAL_CALIBRATION * duration * cos(radians(self.theta) + pi/2)
-        self.z -= HORIZONTAL_CALIBRATION * duration * sin(radians(self.theta) + pi/2)
+        self.x += HORIZONTAL_CALIBRATION * duration * cos(radians(self.theta) + pi / 2)
+        self.z -= HORIZONTAL_CALIBRATION * duration * sin(radians(self.theta) + pi / 2)
 
         for r in self.requirements:
             r.update_on_move(self.x, self.y, self.z)
@@ -96,8 +97,8 @@ class Fly(Visitor):
                            yaw=0,
                            v_m=0,
                            duration=duration)
-        self.x += HORIZONTAL_CALIBRATION * duration * cos(radians(self.theta) - pi/2)
-        self.z -= HORIZONTAL_CALIBRATION * duration * sin(radians(self.theta) - pi/2)
+        self.x += HORIZONTAL_CALIBRATION * duration * cos(radians(self.theta) - pi / 2)
+        self.z -= HORIZONTAL_CALIBRATION * duration * sin(radians(self.theta) - pi / 2)
 
         for r in self.requirements:
             r.update_on_move(self.x, self.y, self.z)
