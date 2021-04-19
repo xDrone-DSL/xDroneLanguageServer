@@ -89,17 +89,8 @@ def _parse_program(program):
     return tree
 
 
-if __name__ == '__main__':
-    drone_config = DroneConfig(speed_mps=0.5, rotate_speed_dps=45, takeoff_height_meters=1)
-    safety_config = SafetyConfig(max_seconds=60, max_x_meters=2, max_y_meters=2, max_z_meters=2,
-                                 min_x_meters=-2, min_y_meters=-2, min_z_meters=0)
-    state_updater = StateUpdater(drone_config)  # (DefaultDroneConfig())
-    safety_checker = SafetyChecker(safety_config)  # (DefaultSafetyConfig())
-
-    commands = generate_commands(r"""
-    main () {
-        takeoff();
-        wait(1);
-    }
-    """, state_updater=state_updater, safety_checker=safety_checker)
-    for c in commands: print(c)
+def generate_commands_with_config(program, config_json):
+    drone_config, safety_config = ConfigParser.parse(config_json)
+    state_updater = StateUpdater(drone_config)
+    safety_checker = SafetyChecker(safety_config)
+    return generate_commands(program, state_updater, safety_checker)
