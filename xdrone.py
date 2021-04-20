@@ -57,7 +57,7 @@ def _simulate(program, config):
         print("Failed to validate your program, error: " + str(e))
         return
     print("Start simulation...")
-    simulation_json = SimulationConverter.convert_commands(commands)
+    simulation_json = SimulationConverter().convert_commands(commands)
     print(simulation_json)
     # TODO
 

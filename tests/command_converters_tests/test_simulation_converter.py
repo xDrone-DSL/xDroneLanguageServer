@@ -17,7 +17,7 @@ class TestSimulationConverter(unittest.TestCase):
                     {"action": "rotate_left", "value": [1]},
                     {"action": "rotate_right", "value": [1]},
                     {"action": "wait", "value": [1]}]
-        actual = SimulationConverter.convert_commands([Command.takeoff(),
+        actual = SimulationConverter().convert_commands([Command.takeoff(),
                                                        Command.land(),
                                                        Command.up(1),
                                                        Command.down(1),
