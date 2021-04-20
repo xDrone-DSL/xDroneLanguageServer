@@ -61,9 +61,6 @@ class Command:
     def wait(time_seconds: Union[int, float]) -> Command:
         return Command("wait", [time_seconds])
 
-    def to_simulation_json(self) -> dict:
-        return {"action": self._opcode, "value": self._operands}
-
     def __str__(self):
         return "Command: {{ opcode: {}, operands: {} }}".format(self._opcode, self._operands)
 

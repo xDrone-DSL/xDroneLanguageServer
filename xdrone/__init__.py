@@ -2,6 +2,7 @@ import antlr4
 
 from antlr.xDroneLexer import xDroneLexer, CommonTokenStream
 from antlr.xDroneParser import xDroneParser
+from xdrone.command_converters.simulation_converter import SimulationConverter
 from xdrone.compiler.compiler import Compiler
 from xdrone.compiler.compiler_utils.error_listener import ParserErrorListener
 from xdrone.compiler.compiler_utils.functions import FunctionTable
@@ -10,6 +11,7 @@ from xdrone.config_parsers.config_parser import ConfigParser
 from xdrone.safety_checker.safety_checker import SafetyChecker
 from xdrone.shared.compile_error import XDroneSyntaxError
 from xdrone.shared.drone_config import DefaultDroneConfig
+from xdrone.shared.safety_check_error import SafetyCheckError
 from xdrone.shared.safety_config import SafetyConfig
 from xdrone.state_updaters.state_updater import StateUpdater
 from xdrone.visitors.fly import Fly
@@ -27,28 +29,19 @@ def fly(program, rs, addr="d0:3a:86:9d:e6:5a"):
 
 
 def validate(program, bounds):
-    # TODO
-    pass
-    # parse_tree = xdrone_parser.parse(program)
-    # validator = Validate()
-    # validator.visit(parse_tree)
-    #
-    # if validator.max_z > bounds["height"]:
-    #     return {"success": False, "message": "The drone flies too high"}
-    # if (
-    #     abs(validator.max_x) > bounds["width"] / 2 or
-    #     abs(validator.min_x) > bounds["width"] / 2 or
-    #     abs(validator.max_y) > bounds["depth"] / 2 or
-    #     abs(validator.min_y) > bounds["depth"] / 2
-    # ):
-    #     return {"success": False, "message": "The drone flies out of bounds"}
-    #
-    # return {"success": True}
+    safety_config = SafetyConfig(max_seconds=float("inf"), max_x_meters=bounds["width"] / 2,
+                                 max_y_meters=bounds["depth"] / 2, max_z_meters=bounds["height"],
+                                 min_x_meters=-bounds["width"] / 2, min_y_meters=-bounds["depth"] / 2, min_z_meters=0)
+    try:
+        generate_simulation_json(program, safety_checker=SafetyChecker(safety_config))
+    except SafetyCheckError as e:
+        return {"success": False, "message": e}
+    return {"success": True}
 
 
 def generate_simulation_json(program, state_updater=None, safety_checker=None):
     commands = generate_commands(program, state_updater, safety_checker)
-    return [command.to_simulation_json() for command in commands]
+    return SimulationConverter.convert_commands(commands)
 
 
 def generate_commands(program, state_updater: StateUpdater = None, safety_checker: SafetyChecker = None,

@@ -10,77 +10,66 @@ class TestCommands(unittest.TestCase):
         self.assertEqual("takeoff", Command.takeoff().opcode)
         self.assertEqual([], Command.takeoff().operands)
         self.assertEqual("Command: { opcode: takeoff, operands: [] }", str(Command.takeoff()))
-        self.assertEqual({"action": "takeoff", "value": []}, Command.takeoff().to_simulation_json())
 
     def test_land(self):
         self.assertEqual(Command.land(), Command.land())
         self.assertEqual("land", Command.land().opcode)
         self.assertEqual([], Command.land().operands)
         self.assertEqual("Command: { opcode: land, operands: [] }", str(Command.land()))
-        self.assertEqual({"action": "land", "value": []}, Command.land().to_simulation_json())
 
     def test_up(self):
         self.assertEqual(Command.up(1), Command.up(1))
         self.assertEqual("up", Command.up(1).opcode)
         self.assertEqual([1], Command.up(1).operands)
         self.assertEqual("Command: { opcode: up, operands: [1] }", str(Command.up(1)))
-        self.assertEqual({"action": "up", "value": [1]}, Command.up(1).to_simulation_json())
 
     def test_down(self):
         self.assertEqual(Command.down(1), Command.down(1))
         self.assertEqual("down", Command.down(1).opcode)
         self.assertEqual([1], Command.down(1).operands)
         self.assertEqual("Command: { opcode: down, operands: [1] }", str(Command.down(1)))
-        self.assertEqual({"action": "down", "value": [1]}, Command.down(1).to_simulation_json())
 
     def test_left(self):
         self.assertEqual(Command.left(1), Command.left(1))
         self.assertEqual("left", Command.left(1).opcode)
         self.assertEqual([1], Command.left(1).operands)
         self.assertEqual("Command: { opcode: left, operands: [1] }", str(Command.left(1)))
-        self.assertEqual({"action": "left", "value": [1]}, Command.left(1).to_simulation_json())
 
     def test_right(self):
         self.assertEqual(Command.right(1), Command.right(1))
         self.assertEqual("right", Command.right(1).opcode)
         self.assertEqual([1], Command.right(1).operands)
         self.assertEqual("Command: { opcode: right, operands: [1] }", str(Command.right(1)))
-        self.assertEqual({"action": "right", "value": [1]}, Command.right(1).to_simulation_json())
 
     def test_forward(self):
         self.assertEqual(Command.forward(1), Command.forward(1))
         self.assertEqual("forward", Command.forward(1).opcode)
         self.assertEqual([1], Command.forward(1).operands)
         self.assertEqual("Command: { opcode: forward, operands: [1] }", str(Command.forward(1)))
-        self.assertEqual({"action": "forward", "value": [1]}, Command.forward(1).to_simulation_json())
 
     def test_backward(self):
         self.assertEqual(Command.backward(1), Command.backward(1))
         self.assertEqual("backward", Command.backward(1).opcode)
         self.assertEqual([1], Command.backward(1).operands)
         self.assertEqual("Command: { opcode: backward, operands: [1] }", str(Command.backward(1)))
-        self.assertEqual({"action": "backward", "value": [1]}, Command.backward(1).to_simulation_json())
 
     def test_rotate_left(self):
         self.assertEqual(Command.rotate_left(1), Command.rotate_left(1))
         self.assertEqual("rotate_left", Command.rotate_left(1).opcode)
         self.assertEqual([1], Command.rotate_left(1).operands)
         self.assertEqual("Command: { opcode: rotate_left, operands: [1] }", str(Command.rotate_left(1)))
-        self.assertEqual({"action": "rotate_left", "value": [1]}, Command.rotate_left(1).to_simulation_json())
 
     def test_rotate_right(self):
         self.assertEqual(Command.rotate_right(1), Command.rotate_right(1))
         self.assertEqual("rotate_right", Command.rotate_right(1).opcode)
         self.assertEqual([1], Command.rotate_right(1).operands)
         self.assertEqual("Command: { opcode: rotate_right, operands: [1] }", str(Command.rotate_right(1)))
-        self.assertEqual({"action": "rotate_right", "value": [1]}, Command.rotate_right(1).to_simulation_json())
 
     def test_wait(self):
         self.assertEqual(Command.wait(1), Command.wait(1))
         self.assertEqual("wait", Command.wait(1).opcode)
         self.assertEqual([1], Command.wait(1).operands)
         self.assertEqual("Command: { opcode: wait, operands: [1] }", str(Command.wait(1)))
-        self.assertEqual({"action": "wait", "value": [1]}, Command.wait(1).to_simulation_json())
 
     def test_eq(self):
         commands1 = [None, Command.takeoff(), Command.land(),
