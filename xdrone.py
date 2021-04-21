@@ -1,4 +1,6 @@
 import multiprocessing
+import urllib.parse
+import webbrowser
 
 import click
 
@@ -57,9 +59,19 @@ def _simulate(program, config):
         print("Failed to validate your program, error: " + str(e))
         return
     print("Start simulation...")
+    if not _is_port_in_use(8080):
+        print("Aborted. Please make sure xDrone Simulator is running at localhost port 8080")
+        return
     simulation_json = SimulationConverter().convert_commands(commands)
-    print(simulation_json)
-    # TODO
+    url = "http://localhost:8080/?commands=" + urllib.parse.quote(simulation_json)
+    print(url)
+    webbrowser.open(url)
+
+
+def _is_port_in_use(port):
+    import socket
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        return s.connect_ex(('localhost', port)) == 0
 
 
 def _fly(program, config):

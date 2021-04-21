@@ -1,4 +1,7 @@
+import json
 import unittest
+import zlib
+from base64 import b64decode
 
 from xdrone.command_converters.simulation_converter import SimulationConverter
 from xdrone.shared.command import Command
@@ -6,7 +9,7 @@ from xdrone.shared.command import Command
 
 class TestSimulationConverter(unittest.TestCase):
     def test_convert_command(self):
-        expected = [{"action": "takeoff", "value": []},
+        commands = [{"action": "takeoff", "value": []},
                     {"action": "land", "value": []},
                     {"action": "up", "value": [1]},
                     {"action": "down", "value": [1]},
@@ -18,14 +21,14 @@ class TestSimulationConverter(unittest.TestCase):
                     {"action": "rotate_right", "value": [1]},
                     {"action": "wait", "value": [1]}]
         actual = SimulationConverter().convert_commands([Command.takeoff(),
-                                                       Command.land(),
-                                                       Command.up(1),
-                                                       Command.down(1),
-                                                       Command.left(1),
-                                                       Command.right(1),
-                                                       Command.forward(1),
-                                                       Command.backward(1),
-                                                       Command.rotate_left(1),
-                                                       Command.rotate_right(1),
-                                                       Command.wait(1)])
-        self.assertEqual(expected, actual)
+                                                         Command.land(),
+                                                         Command.up(1),
+                                                         Command.down(1),
+                                                         Command.left(1),
+                                                         Command.right(1),
+                                                         Command.forward(1),
+                                                         Command.backward(1),
+                                                         Command.rotate_left(1),
+                                                         Command.rotate_right(1),
+                                                         Command.wait(1)])
+        self.assertEqual(commands, json.loads(zlib.decompress(b64decode(actual))))
