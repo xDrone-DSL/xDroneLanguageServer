@@ -66,7 +66,7 @@ class TestDJITelloExecutor(unittest.TestCase):
 
     def test_dji_tello_executor_if_receive_error_should_print(self) -> None:
         mocked_socket = Mock()
-        mocked_socket.recvfrom = Mock(side_effect=Exception('exception'))
+        mocked_socket.recvfrom = Mock(side_effect=Exception('timed out'))
         mocked_socket.sendto = Mock()
         commands = [Command.takeoff(),
                     Command.land()]
@@ -80,9 +80,42 @@ class TestDJITelloExecutor(unittest.TestCase):
                  call(b"land", ('192.168.10.1', 8889))]
         mocked_socket.sendto.assert_has_calls(calls)
         expected_log = ["INFO:root:sent message: b'command'",
-                        "ERROR:root:exception",
+                        "ERROR:root:Error met when receiving response: timed out",
                         "INFO:root:sent message: b'takeoff'",
-                        "ERROR:root:exception",
+                        "ERROR:root:Error met when receiving response: timed out",
                         "INFO:root:sent message: b'land'",
-                        "ERROR:root:exception"]
+                        "ERROR:root:Error met when receiving response: timed out"]
         self.assertEqual(expected_log, log.output)
+
+    def test_dji_tello_executor_if_interrupt_error_should_stop_and_emergency(self) -> None:
+        mocked_socket = Mock()
+        mocked_socket.recvfrom = Mock(return_value=(b'ok', ('192.168.10.1', 8889)))
+        mocked_socket.sendto = Mock()
+
+        def mocked_sendto(msg, _):
+            if msg == b"takeoff":
+                raise KeyboardInterrupt
+
+        mocked_socket.sendto.side_effect = mocked_sendto
+        commands = [Command.takeoff(),
+                    Command.land()]
+        executor = DJITelloExecutor()
+        executor.sock.close()
+        executor.sock = mocked_socket
+        with self.assertLogs(logging.getLogger()) as log:
+            executor.execute_commands(commands)
+        calls = [call(b"command", ('192.168.10.1', 8889)),
+                 call(b"takeoff", ('192.168.10.1', 8889)),
+                 call(b"emergency", ('192.168.10.1', 8889))]
+        mocked_socket.sendto.assert_has_calls(calls)
+        expected_log = ["INFO:root:sent message: b'command'",
+                        "INFO:root:received response: ok",
+                        "INFO:root:KeyboardInterrupt received. Forced stop."]
+        self.assertEqual(expected_log, log.output)
+
+    def test_dji_tello_executor_if_interrupted_before_recv_thread_start_should_not_give_error(self) -> None:
+        commands = [Command.takeoff(),
+                    Command.land()]
+        executor = DJITelloExecutor()
+        executor.recv_thread.start = Mock(side_effect=KeyboardInterrupt)
+        executor.execute_commands(commands)

@@ -1,3 +1,4 @@
+import logging
 import multiprocessing
 import urllib.parse
 import webbrowser
@@ -15,7 +16,7 @@ from xdrone.command_converters.simulation_converter import SimulationConverter
 @click.option('--fly', 'function', flag_value='fly', help='Fly the drone.')
 @click.option('--code', type=click.Path(), help='The file contains your code.')
 @click.option('--config', type=click.Path(), help='The configuration json of your drone and flight environment.')
-@click.option('--timeout', type=click.INT, help='Timeout.')
+@click.option('--timeout', default=5, type=click.INT, help='Timeout of compilation.')
 @click.option('--port', default=8080, type=click.INT, help='Port on localhost where the simulator server is running.')
 def xdrone(function, code, config, timeout, port):
     with open(code, mode='r') as file:
@@ -23,42 +24,40 @@ def xdrone(function, code, config, timeout, port):
     with open(config, mode='r') as file:
         config = file.read()
 
-    if function == "validate":
-        timeout = 5 if timeout is None else timeout
-        _run_with_timeout(_validate, (program, config), timeout)
+    queue = multiprocessing.Queue()
+    _run_with_timeout(_validate, (program, config, queue), timeout,
+                      "Timed out. Please check whether your code contains an infinite loop. " +
+                      "Your can change the timeout time by adding the '--timeout' tag.")
+    if queue.empty():
+        return
+    commands = queue.get()
     if function == "simulate":
-        timeout = 5 if timeout is None else timeout
-        _run_with_timeout(_simulate, (program, config, port), timeout)
+        _simulate(commands, port)
     if function == "fly":
-        timeout = 30 if timeout is None else timeout
-        _run_with_timeout(_fly, (program, config), timeout)
+        _fly(commands)
 
 
-def _run_with_timeout(target, args, timeout):
+def _run_with_timeout(target, args, timeout, timeout_msg="Timeout"):
     p = multiprocessing.Process(target=target, args=args)
     p.start()
     p.join(timeout)
     if p.is_alive():
-        print("Timeout")
+        print(timeout_msg)
         p.terminate()
         p.join()
 
 
-def _validate(program, config):
+def _validate(program, config, queue):
+    print("Validating your program...")
     try:
-        generate_commands_with_config(program, config)
+        command = generate_commands_with_config(program, config)
         print("Your program is valid.")
+        queue.put(command)
     except Exception as e:
         print("Failed to validate your program, error: " + str(e))
 
 
-def _simulate(program, config, port):
-    try:
-        commands = generate_commands_with_config(program, config)
-        print("Your program is valid.")
-    except Exception as e:
-        print("Failed to validate your program, error: " + str(e))
-        return
+def _simulate(commands, port):
     print("Start simulation...")
     if not _is_port_in_use(port):
         print("Aborted. Please make sure xDrone Simulator is running on localhost port {}. ".format(port) +
@@ -76,16 +75,11 @@ def _is_port_in_use(port):
         return s.connect_ex(('localhost', port)) == 0
 
 
-def _fly(program, config):
-    try:
-        commands = generate_commands_with_config(program, config)
-        print("Your program is valid.")
-    except Exception as e:
-        print("Failed to validate your program, error: " + str(e))
-        return
+def _fly(commands):
     print("Start to fly your drone...")
     DJITelloExecutor().execute_commands(commands)
 
 
 if __name__ == '__main__':
-    xdrone()
+    logging.basicConfig(level=logging.INFO)
+    xdrone(standalone_mode=False)
