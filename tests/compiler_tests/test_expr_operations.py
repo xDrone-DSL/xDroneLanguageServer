@@ -1,10 +1,10 @@
 import unittest
 
 from xdrone import generate_commands
-from xdrone.shared.compile_error import CompileError
 from xdrone.compiler.compiler_utils.expressions import Expression
 from xdrone.compiler.compiler_utils.symbol_table import SymbolTable
 from xdrone.compiler.compiler_utils.type import Type
+from xdrone.shared.compile_error import CompileError
 
 
 class EscapedStringTest(unittest.TestCase):
@@ -483,6 +483,7 @@ class ArithmeticOperationTest(unittest.TestCase):
               decimal b <- 1 + 1.0;
               decimal c <- 1.0 + 1;
               decimal d <- 1.0 + 1.0;
+              vector e <- (1.0, -2.0, 3.0) + (1.0, -2.0, 3.0);
             }
             """, symbol_table=actual)
         expected = SymbolTable()
@@ -490,33 +491,30 @@ class ArithmeticOperationTest(unittest.TestCase):
         expected.store("b", Expression(Type.decimal(), 2.0, ident="b"))
         expected.store("c", Expression(Type.decimal(), 2.0, ident="c"))
         expected.store("d", Expression(Type.decimal(), 2.0, ident="d"))
+        expected.store("e", Expression(Type.vector(), [2.0, -4.0, 6.0], ident="e"))
         self.assertEqual(expected, actual)
 
     def test_plus_with_wrong_type_should_give_error(self):
-        types = [Type.boolean(), Type.string(), Type.vector(), Type.list_of(Type.int()),
+        types = [Type.int(), Type.decimal(), Type.string(), Type.boolean(), Type.vector(), Type.list_of(Type.int()),
                  Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
-        for type in types:
-            with self.assertRaises(CompileError) as context:
-                generate_commands("""
-                    main () {{
-                      {} a;
-                      int b <- a + 1;
-                    }}
-                    """.format(type))
-            self.assertTrue("Expression {} should have type int or decimal, but is {}"
-                            .format(Expression(type, type.default_value, ident="a"), type.type_name)
-                            in str(context.exception))
-
-            with self.assertRaises(CompileError) as context:
-                generate_commands("""
-                    main () {{
-                      {} a;
-                      int b <- 1 + a;
-                    }}
-                    """.format(type))
-            self.assertTrue("Expression {} should have type int or decimal, but is {}"
-                            .format(Expression(type, type.default_value, ident="a"), type.type_name)
-                            in str(context.exception))
+        allow_pairs = [(Type.int(), Type.int()), (Type.decimal(), Type.decimal()), (Type.vector(), Type.vector()),
+                       (Type.int(), Type.decimal()), (Type.decimal(), Type.int())]
+        for t1 in types:
+            for t2 in types:
+                if (t1, t2) in allow_pairs:
+                    continue
+                with self.assertRaises(CompileError) as context:
+                    generate_commands("""
+                        main () {{
+                          {} a;
+                          {} b;
+                          int c <- a + b;
+                        }}
+                        """.format(t1, t2))
+                self.assertTrue("Expression {} and {} have wrong types to perform addition or subtraction"
+                                .format(Expression(t1, t1.default_value, ident="a"),
+                                        Expression(t2, t2.default_value, ident="b"))
+                                in str(context.exception))
 
     def test_minus_should_return_correct_value(self):
         actual = SymbolTable()
@@ -526,6 +524,7 @@ class ArithmeticOperationTest(unittest.TestCase):
               decimal b <- 3 - 1.0;
               decimal c <- 3.0 - 1;
               decimal d <- 3.0 - 1.0;
+              vector e <- (1.0, -2.0, 3.0) - (-1.0, 2.0, -3.0);
             }
             """, symbol_table=actual)
         expected = SymbolTable()
@@ -533,33 +532,30 @@ class ArithmeticOperationTest(unittest.TestCase):
         expected.store("b", Expression(Type.decimal(), 2.0, ident="b"))
         expected.store("c", Expression(Type.decimal(), 2.0, ident="c"))
         expected.store("d", Expression(Type.decimal(), 2.0, ident="d"))
+        expected.store("e", Expression(Type.vector(), [2.0, -4.0, 6.0], ident="e"))
         self.assertEqual(expected, actual)
 
     def test_minus_with_wrong_type_should_give_error(self):
-        types = [Type.boolean(), Type.string(), Type.vector(), Type.list_of(Type.int()),
+        types = [Type.int(), Type.decimal(), Type.string(), Type.boolean(), Type.vector(), Type.list_of(Type.int()),
                  Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
-        for type in types:
-            with self.assertRaises(CompileError) as context:
-                generate_commands("""
-                    main () {{
-                      {} a;
-                      int b <- a - 1;
-                    }}
-                    """.format(type))
-            self.assertTrue("Expression {} should have type int or decimal, but is {}"
-                            .format(Expression(type, type.default_value, ident="a"), type.type_name)
-                            in str(context.exception))
-
-            with self.assertRaises(CompileError) as context:
-                generate_commands("""
-                    main () {{
-                      {} a;
-                      int b <- 1 - a;
-                    }}
-                    """.format(type))
-            self.assertTrue("Expression {} should have type int or decimal, but is {}"
-                            .format(Expression(type, type.default_value, ident="a"), type.type_name)
-                            in str(context.exception))
+        allow_pairs = [(Type.int(), Type.int()), (Type.decimal(), Type.decimal()), (Type.vector(), Type.vector()),
+                       (Type.int(), Type.decimal()), (Type.decimal(), Type.int())]
+        for t1 in types:
+            for t2 in types:
+                if (t1, t2) in allow_pairs:
+                    continue
+                with self.assertRaises(CompileError) as context:
+                    generate_commands("""
+                        main () {{
+                          {} a;
+                          {} b;
+                          int c <- a - b;
+                        }}
+                        """.format(t1, t2))
+                self.assertTrue("Expression {} and {} have wrong types to perform addition or subtraction"
+                                .format(Expression(t1, t1.default_value, ident="a"),
+                                        Expression(t2, t2.default_value, ident="b"))
+                                in str(context.exception))
 
     def test_multi_should_return_correct_value(self):
         actual = SymbolTable()
@@ -569,6 +565,10 @@ class ArithmeticOperationTest(unittest.TestCase):
               decimal b <- 2 * 1.0;
               decimal c <- 2.0 * 1;
               decimal d <- 2.0 * 1.0;
+              vector e <- (1.0, 2.0, -3.0) * 2;
+              vector f <- (1.0, 2.0, -3.0) * 2.0;
+              vector g <- 2 * (1.0, 2.0, -3.0);
+              vector h <- 2.0 * (1.0, 2.0, -3.0);
             }
             """, symbol_table=actual)
         expected = SymbolTable()
@@ -576,33 +576,35 @@ class ArithmeticOperationTest(unittest.TestCase):
         expected.store("b", Expression(Type.decimal(), 2.0, ident="b"))
         expected.store("c", Expression(Type.decimal(), 2.0, ident="c"))
         expected.store("d", Expression(Type.decimal(), 2.0, ident="d"))
+        expected.store("e", Expression(Type.vector(), [2.0, 4.0, -6.0], ident="e"))
+        expected.store("f", Expression(Type.vector(), [2.0, 4.0, -6.0], ident="f"))
+        expected.store("g", Expression(Type.vector(), [2.0, 4.0, -6.0], ident="g"))
+        expected.store("h", Expression(Type.vector(), [2.0, 4.0, -6.0], ident="h"))
         self.assertEqual(expected, actual)
 
     def test_multi_with_wrong_type_should_give_error(self):
-        types = [Type.boolean(), Type.string(), Type.vector(), Type.list_of(Type.int()),
+        types = [Type.int(), Type.decimal(), Type.string(), Type.boolean(), Type.vector(), Type.list_of(Type.int()),
                  Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
-        for type in types:
-            with self.assertRaises(CompileError) as context:
-                generate_commands("""
-                    main () {{
-                      {} a;
-                      int b <- a * 1;
-                    }}
-                    """.format(type))
-            self.assertTrue("Expression {} should have type int or decimal, but is {}"
-                            .format(Expression(type, type.default_value, ident="a"), type.type_name)
-                            in str(context.exception))
-
-            with self.assertRaises(CompileError) as context:
-                generate_commands("""
-                    main () {{
-                      {} a;
-                      int b <- 1 * a;
-                    }}
-                    """.format(type))
-            self.assertTrue("Expression {} should have type int or decimal, but is {}"
-                            .format(Expression(type, type.default_value, ident="a"), type.type_name)
-                            in str(context.exception))
+        allow_pairs = [(Type.int(), Type.int()), (Type.decimal(), Type.decimal()),
+                       (Type.int(), Type.decimal()), (Type.decimal(), Type.int()),
+                       (Type.vector(), Type.int()), (Type.int(), Type.vector()),
+                       (Type.vector(), Type.decimal()), (Type.decimal(), Type.vector())]
+        for t1 in types:
+            for t2 in types:
+                if (t1, t2) in allow_pairs:
+                    continue
+                with self.assertRaises(CompileError) as context:
+                    generate_commands("""
+                        main () {{
+                          {} a;
+                          {} b;
+                          int c <- a * b;
+                        }}
+                        """.format(t1, t2))
+                self.assertTrue("Expression {} and {} have wrong types to perform multiplication or division"
+                                .format(Expression(t1, t1.default_value, ident="a"),
+                                        Expression(t2, t2.default_value, ident="b"))
+                                in str(context.exception))
 
     def test_divide_should_return_correct_value(self):
         actual = SymbolTable()
@@ -616,6 +618,8 @@ class ArithmeticOperationTest(unittest.TestCase):
               decimal f <- 1 / 2.0;
               decimal g <- 1.0 / 2;
               decimal h <- 1.0 / 2.0;
+              vector i <- (1.0, 2.0, 3.0) / 2;
+              vector j <- (1.0, 2.0, 3.0) / 2.0;
             }
             """, symbol_table=actual)
         expected = SymbolTable()
@@ -627,33 +631,33 @@ class ArithmeticOperationTest(unittest.TestCase):
         expected.store("f", Expression(Type.decimal(), 0.5, ident="f"))
         expected.store("g", Expression(Type.decimal(), 0.5, ident="g"))
         expected.store("h", Expression(Type.decimal(), 0.5, ident="h"))
+        expected.store("i", Expression(Type.vector(), [0.5, 1.0, 1.5], ident="i"))
+        expected.store("j", Expression(Type.vector(), [0.5, 1.0, 1.5], ident="j"))
         self.assertEqual(expected, actual)
 
     def test_divide_with_wrong_type_should_give_error(self):
-        types = [Type.boolean(), Type.string(), Type.vector(), Type.list_of(Type.int()),
+        types = [Type.int(), Type.decimal(), Type.string(), Type.boolean(), Type.vector(), Type.list_of(Type.int()),
                  Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
-        for type in types:
-            with self.assertRaises(CompileError) as context:
-                generate_commands("""
-                    main () {{
-                      {} a;
-                      int b <- a / 1;
-                    }}
-                    """.format(type))
-            self.assertTrue("Expression {} should have type int or decimal, but is {}"
-                            .format(Expression(type, type.default_value, ident="a"), type.type_name)
-                            in str(context.exception))
-
-            with self.assertRaises(CompileError) as context:
-                generate_commands("""
-                    main () {{
-                      {} a;
-                      int b <- 1 / a;
-                    }}
-                    """.format(type))
-            self.assertTrue("Expression {} should have type int or decimal, but is {}"
-                            .format(Expression(type, type.default_value, ident="a"), type.type_name)
-                            in str(context.exception))
+        allow_pairs = [(Type.int(), Type.int()), (Type.decimal(), Type.decimal()),
+                       (Type.int(), Type.decimal()), (Type.decimal(), Type.int()),
+                       (Type.vector(), Type.int()),
+                       (Type.vector(), Type.decimal())]
+        for t1 in types:
+            for t2 in types:
+                if (t1, t2) in allow_pairs:
+                    continue
+                with self.assertRaises(CompileError) as context:
+                    generate_commands("""
+                        main () {{
+                          {} a;
+                          {} b;
+                          int c <- a / b;
+                        }}
+                        """.format(t1, t2))
+                self.assertTrue("Expression {} and {} have wrong types to perform multiplication or division"
+                                .format(Expression(t1, t1.default_value, ident="a"),
+                                        Expression(t2, t2.default_value, ident="b"))
+                                in str(context.exception))
 
     def test_divide_by_zero_should_give_error(self):
         with self.assertRaises(CompileError) as context:
@@ -678,15 +682,17 @@ class ArithmeticOperationTest(unittest.TestCase):
             main () {
               int a <- + 1;
               decimal b <- + 1.0;
+              vector c <- + (1.0, -1.0, 2.0);
             }
             """, symbol_table=actual)
         expected = SymbolTable()
         expected.store("a", Expression(Type.int(), 1, ident="a"))
         expected.store("b", Expression(Type.decimal(), 1.0, ident="b"))
+        expected.store("c", Expression(Type.vector(), [1.0, -1.0, 2.0], ident="c"))
         self.assertEqual(expected, actual)
 
     def test_posit_with_wrong_type_should_give_error(self):
-        types = [Type.boolean(), Type.string(), Type.vector(), Type.list_of(Type.int()),
+        types = [Type.boolean(), Type.string(), Type.list_of(Type.int()),
                  Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
         for type in types:
             with self.assertRaises(CompileError) as context:
@@ -696,7 +702,7 @@ class ArithmeticOperationTest(unittest.TestCase):
                       {} b <- + a;
                     }}
                     """.format(type, type))
-            self.assertTrue("Expression {} should have type int or decimal, but is {}"
+            self.assertTrue("Expression {} should have type int, decimal or vector, but is {}"
                             .format(Expression(type, type.default_value, ident="a"), type.type_name)
                             in str(context.exception))
 
@@ -706,15 +712,17 @@ class ArithmeticOperationTest(unittest.TestCase):
             main () {
               int a <- - 1;
               decimal b <- - 1.0;
+              vector c <- - (1.0, -1.0, 2.0);
             }
             """, symbol_table=actual)
         expected = SymbolTable()
         expected.store("a", Expression(Type.int(), -1, ident="a"))
         expected.store("b", Expression(Type.decimal(), -1.0, ident="b"))
+        expected.store("c", Expression(Type.vector(), [-1.0, 1.0, -2.0], ident="c"))
         self.assertEqual(expected, actual)
 
     def test_negate_with_wrong_type_should_give_error(self):
-        types = [Type.boolean(), Type.string(), Type.vector(), Type.list_of(Type.int()),
+        types = [Type.boolean(), Type.string(), Type.list_of(Type.int()),
                  Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
         for type in types:
             with self.assertRaises(CompileError) as context:
@@ -724,7 +732,7 @@ class ArithmeticOperationTest(unittest.TestCase):
                       {} b <- - a;
                     }}
                     """.format(type, type))
-            self.assertTrue("Expression {} should have type int or decimal, but is {}"
+            self.assertTrue("Expression {} should have type int, decimal or vector, but is {}"
                             .format(Expression(type, type.default_value, ident="a"), type.type_name)
                             in str(context.exception))
 

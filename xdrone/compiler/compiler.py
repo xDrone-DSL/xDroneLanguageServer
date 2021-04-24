@@ -533,12 +533,19 @@ class Compiler(xDroneParserVisitor):
 
     def visitPositNegate(self, ctx: xDroneParser.PositNegateContext) -> Expression:
         expr = self.visit(ctx.expr())
-        if expr.type != Type.int() and expr.type != Type.decimal():
-            raise CompileError("Expression {} should have type int or decimal, but is {}".format(expr, expr.type))
-        if ctx.PLUS():
-            result_value = +expr.value
-        else:  # MINUS
-            result_value = -expr.value
+        if expr.type == Type.int() or expr.type == Type.decimal():
+            if ctx.PLUS():
+                result_value = +expr.value
+            else:  # MINUS
+                result_value = -expr.value
+        elif expr.type == Type.vector():
+            if ctx.PLUS():
+                result_value = [+e for e in expr.value]
+            else:  # MINUS
+                result_value = [-e for e in expr.value]
+        else:
+            raise CompileError(
+                "Expression {} should have type int, decimal or vector, but is {}".format(expr, expr.type))
         return Expression(expr.type, result_value)
 
     def visitNot(self, ctx: xDroneParser.NotContext) -> Expression:
@@ -547,40 +554,61 @@ class Compiler(xDroneParserVisitor):
             raise CompileError("Expression {} should have type boolean, but is {}".format(expr, expr.type))
         return Expression(Type.boolean(), not expr.value)
 
-    def _get_result_type(self, type1: Type, type2: Type):
-        assert type1 == Type.int() or type1 == Type.decimal()
-        assert type2 == Type.int() or type2 == Type.decimal()
+    def _is_int_or_decimal(self, type: Type):
+        return type == Type.int() or type == Type.decimal()
+
+    def _get_int_decimal_result_type(self, type1: Type, type2: Type):
+        assert self._is_int_or_decimal(type1)
+        assert self._is_int_or_decimal(type2)
         if type1 == Type.decimal() or type2 == Type.decimal():
             return Type.decimal(), float
         return Type.int(), int
 
     def visitMultiDivide(self, ctx: xDroneParser.MultiDivideContext) -> Expression:
         expr1, expr2 = self.visit(ctx.expr(0)), self.visit(ctx.expr(1))
-        if expr1.type != Type.int() and expr1.type != Type.decimal():
-            raise CompileError("Expression {} should have type int or decimal, but is {}".format(expr1, expr1.type))
-        if expr2.type != Type.int() and expr2.type != Type.decimal():
-            raise CompileError("Expression {} should have type int or decimal, but is {}".format(expr2, expr2.type))
-        result_type, func = self._get_result_type(expr1.type, expr2.type)
-
-        if ctx.MULTI():
-            result_value = func(expr1.value * expr2.value)
-        else:  # DIV
-            if expr2.value == 0:
-                raise CompileError("Division by zero")
-            result_value = func(expr1.value / expr2.value)
+        if self._is_int_or_decimal(expr1.type) and self._is_int_or_decimal(expr2.type):
+            result_type, func = self._get_int_decimal_result_type(expr1.type, expr2.type)
+            if ctx.MULTI():
+                result_value = func(expr1.value * expr2.value)
+            else:  # DIV
+                if expr2.value == 0:
+                    raise CompileError("Division by zero")
+                result_value = func(expr1.value / expr2.value)
+        elif self._is_int_or_decimal(expr1.type) and expr2.type == Type.vector():
+            result_type = Type.vector()
+            if ctx.MULTI():
+                result_value = [expr1.value * e for e in expr2.value]
+            else:  # DIV
+                raise CompileError("Expression {} and {} have wrong types to perform multiplication or division"
+                                   .format(expr1, expr2))
+        elif expr1.type == Type.vector() and self._is_int_or_decimal(expr2.type):
+            result_type = Type.vector()
+            if ctx.MULTI():
+                result_value = [e * expr2.value for e in expr1.value]
+            else:  # DIV
+                result_value = [e / expr2.value for e in expr1.value]
+        else:
+            raise CompileError("Expression {} and {} have wrong types to perform multiplication or division"
+                               .format(expr1, expr2))
         return Expression(result_type, result_value)
 
     def visitPlusMinus(self, ctx: xDroneParser.PlusMinusContext) -> Expression:
         expr1, expr2 = self.visit(ctx.expr(0)), self.visit(ctx.expr(1))
-        if expr1.type != Type.int() and expr1.type != Type.decimal():
-            raise CompileError("Expression {} should have type int or decimal, but is {}".format(expr1, expr1.type))
-        if expr2.type != Type.int() and expr2.type != Type.decimal():
-            raise CompileError("Expression {} should have type int or decimal, but is {}".format(expr2, expr2.type))
-        result_type, func = self._get_result_type(expr1.type, expr2.type)
-        if ctx.PLUS():
-            result_value = func(expr1.value + expr2.value)
-        else:  # MINUS
-            result_value = func(expr1.value - expr2.value)
+        if self._is_int_or_decimal(expr1.type) and self._is_int_or_decimal(expr2.type):
+            result_type, func = self._get_int_decimal_result_type(expr1.type, expr2.type)
+            if ctx.PLUS():
+                result_value = func(expr1.value + expr2.value)
+            else:  # MINUS
+                result_value = func(expr1.value - expr2.value)
+        elif expr1.type == Type.vector() and expr2.type == Type.vector():
+            result_type = Type.vector()
+            if ctx.PLUS():
+                result_value = [e1 + e2 for e1, e2 in zip(expr1.value, expr2.value)]
+            else:  # MINUS
+                result_value = [e1 - e2 for e1, e2 in zip(expr1.value, expr2.value)]
+        else:
+            raise CompileError("Expression {} and {} have wrong types to perform addition or subtraction"
+                               .format(expr1, expr2))
         return Expression(result_type, result_value)
 
     def visitConcat(self, ctx: xDroneParser.ConcatContext) -> Expression:
