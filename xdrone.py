@@ -16,7 +16,8 @@ from xdrone.command_converters.simulation_converter import SimulationConverter
 @click.option('--code', type=click.Path(), help='The file contains your code.')
 @click.option('--config', type=click.Path(), help='The configuration json of your drone and flight environment.')
 @click.option('--timeout', type=click.INT, help='Timeout.')
-def xdrone(function, code, config, timeout):
+@click.option('--port', default=8080, type=click.INT, help='Port on localhost where the simulator server is running.')
+def xdrone(function, code, config, timeout, port):
     with open(code, mode='r') as file:
         program = file.read()
     with open(config, mode='r') as file:
@@ -27,7 +28,7 @@ def xdrone(function, code, config, timeout):
         _run_with_timeout(_validate, (program, config), timeout)
     if function == "simulate":
         timeout = 5 if timeout is None else timeout
-        _run_with_timeout(_simulate, (program, config), timeout)
+        _run_with_timeout(_simulate, (program, config, port), timeout)
     if function == "fly":
         timeout = 30 if timeout is None else timeout
         _run_with_timeout(_fly, (program, config), timeout)
@@ -51,7 +52,7 @@ def _validate(program, config):
         print("Failed to validate your program, error: " + str(e))
 
 
-def _simulate(program, config):
+def _simulate(program, config, port):
     try:
         commands = generate_commands_with_config(program, config)
         print("Your program is valid.")
@@ -59,11 +60,12 @@ def _simulate(program, config):
         print("Failed to validate your program, error: " + str(e))
         return
     print("Start simulation...")
-    if not _is_port_in_use(8080):
-        print("Aborted. Please make sure xDrone Simulator is running at localhost port 8080")
+    if not _is_port_in_use(port):
+        print("Aborted. Please make sure xDrone Simulator is running on localhost port {}. ".format(port) +
+              "Your can change the port by adding the '--port' tag.")
         return
     simulation_json = SimulationConverter().convert_commands(commands)
-    url = "http://localhost:8080/?commands=" + urllib.parse.quote(simulation_json)
+    url = "http://localhost:{}/?commands={}".format(port, urllib.parse.quote(simulation_json))
     print(url)
     webbrowser.open(url)
 
