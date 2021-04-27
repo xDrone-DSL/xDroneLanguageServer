@@ -75,7 +75,7 @@ DOT: '.' ;
 COMMA: ',' ;
 SEMICOLON: ';' ;
 ARROW: '<-' ;
-
+PARALLEL: '||' ;
 
 
 fragment DIGIT : [0-9] ;

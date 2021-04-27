@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import copy
-from typing import Union
+from typing import Union, List, Set
 
 
 class Command:
@@ -67,4 +67,85 @@ class Command:
     def __eq__(self, other):
         if isinstance(other, Command):
             return other._opcode == self._opcode and other._operands == self._operands
+        return False
+
+
+class AbstractDroneCommand:
+    def get_drones_involved(self) -> Set[str]:
+        raise NotImplementedError("get_drones_involved not supported in AbstractDroneCommand")
+
+
+class SingleDroneCommand(AbstractDroneCommand):
+    def __init__(self, drone_name: str, command: Command):
+        self._drone_name = drone_name
+        self._command = command
+
+    @property
+    def drone_name(self) -> str:
+        return copy.deepcopy(self._drone_name)
+
+    @property
+    def command(self) -> Command:
+        return copy.deepcopy(self._command)
+
+    def get_drones_involved(self) -> Set[str]:
+        return {self.drone_name}
+
+    def __str__(self):
+        return "SingleDroneCommand: {{ drone_name: {}, command: {} }}".format(self._drone_name, self._command)
+
+    def __repr__(self):
+        return str(self)
+
+    def __eq__(self, other):
+        if isinstance(other, SingleDroneCommand):
+            return other._drone_name == self._drone_name and other._command == self._command
+        return False
+
+
+class RepeatDroneNameException(Exception):
+    def __init__(self, repeated_names: Set[str]):
+        self._repeated_names = repeated_names
+
+    @property
+    def repeated_names(self) -> Set[str]:
+        return copy.deepcopy(self._repeated_names)
+
+
+class ParallelDroneCommands(AbstractDroneCommand):
+    def __init__(self, branches: List[List[AbstractDroneCommand]] = None):
+        self._branches = []
+        self._drones_involved = set()
+        if branches is not None:
+            for branch in branches:
+                self.add(branch)
+
+    @property
+    def branches(self) -> List[List[AbstractDroneCommand]]:
+        return copy.deepcopy(self._branches)
+
+    def get_drones_involved(self) -> Set[str]:
+        return copy.deepcopy(self._drones_involved)
+
+    def add(self, drone_commands: List[AbstractDroneCommand]):
+        drones_to_be_involved = set.union(set(),
+                                          *[drone_command.get_drones_involved() for drone_command in drone_commands])
+        repeated_names = self._drones_involved.intersection(drones_to_be_involved)
+        if len(repeated_names) > 0:
+            raise RepeatDroneNameException(repeated_names)
+        self._branches.append(drone_commands)
+        self._drones_involved = self._drones_involved.union(drones_to_be_involved)
+
+    def __str__(self):
+        result = "ParallelDroneCommands: { "
+        result += ", ".join([str(commands) for commands in self._branches])
+        result += " }"
+        return result
+
+    def __repr__(self):
+        return str(self)
+
+    def __eq__(self, other):
+        if isinstance(other, ParallelDroneCommands):
+            return other._branches == self._branches
         return False

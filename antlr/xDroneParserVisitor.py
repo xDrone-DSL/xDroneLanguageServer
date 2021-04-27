@@ -144,6 +144,16 @@ class xDroneParserVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by xDroneParser#parallel.
+    def visitParallel(self, ctx:xDroneParser.ParallelContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by xDroneParser#droneIdent.
+    def visitDroneIdent(self, ctx:xDroneParser.DroneIdentContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by xDroneParser#ident.
     def visitIdent(self, ctx:xDroneParser.IdentContext):
         return self.visitChildren(ctx)

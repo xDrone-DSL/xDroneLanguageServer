@@ -1,10 +1,10 @@
 import unittest
 
 from xdrone import generate_commands
-from xdrone.shared.compile_error import CompileError
 from xdrone.compiler.compiler_utils.expressions import Expression
 from xdrone.compiler.compiler_utils.type import Type
-from xdrone.shared.command import Command
+from xdrone.shared.command import Command, SingleDroneCommand
+from xdrone.shared.compile_error import CompileError
 
 
 class MovementCommandsTest(unittest.TestCase):
@@ -12,28 +12,34 @@ class MovementCommandsTest(unittest.TestCase):
         actual = generate_commands("""
             main() { takeoff(); land(); }
         """)
-        expected = [Command.takeoff(), Command.land()]
+        expected = [SingleDroneCommand("default", Command.takeoff()),
+                    SingleDroneCommand("default", Command.land())]
         self.assertEqual(expected, actual)
 
     def test_land_should_return_correct_command(self):
         actual = generate_commands("""
             main() { takeoff(); land(); }
         """)
-        expected = [Command.takeoff(), Command.land()]
+        expected = [SingleDroneCommand("default", Command.takeoff()),
+                    SingleDroneCommand("default", Command.land())]
         self.assertEqual(expected, actual)
 
     def test_up_with_int_parameter_should_return_correct_command(self):
         actual = generate_commands("""
             main() { takeoff(); up(1); land(); }
         """)
-        expected = [Command.takeoff(), Command.up(1), Command.land()]
+        expected = [SingleDroneCommand("default", Command.takeoff()),
+                    SingleDroneCommand("default", Command.up(1)),
+                    SingleDroneCommand("default", Command.land())]
         self.assertEqual(expected, actual)
 
     def test_up_with_decimal_parameter_should_return_correct_command(self):
         actual = generate_commands("""
             main() { takeoff(); up(1.0); land(); }
         """)
-        expected = [Command.takeoff(), Command.up(1.0), Command.land()]
+        expected = [SingleDroneCommand("default", Command.takeoff()),
+                    SingleDroneCommand("default", Command.up(1.0)),
+                    SingleDroneCommand("default", Command.land())]
         self.assertEqual(expected, actual)
 
     def test_up_with_incorrect_parameter_should_give_error(self):
@@ -58,14 +64,18 @@ class MovementCommandsTest(unittest.TestCase):
         actual = generate_commands("""
             main() { takeoff(); down(1); land(); }
         """)
-        expected = [Command.takeoff(), Command.down(1), Command.land()]
+        expected = [SingleDroneCommand("default", Command.takeoff()),
+                    SingleDroneCommand("default", Command.down(1)),
+                    SingleDroneCommand("default", Command.land())]
         self.assertEqual(expected, actual)
 
     def test_down_with_decimal_parameter_should_return_correct_command(self):
         actual = generate_commands("""
             main() { takeoff(); down(1.0); land(); }
         """)
-        expected = [Command.takeoff(), Command.down(1.0), Command.land()]
+        expected = [SingleDroneCommand("default", Command.takeoff()),
+                    SingleDroneCommand("default", Command.down(1.0)),
+                    SingleDroneCommand("default", Command.land())]
         self.assertEqual(expected, actual)
 
     def test_down_with_incorrect_parameter_should_give_error(self):
@@ -90,14 +100,18 @@ class MovementCommandsTest(unittest.TestCase):
         actual = generate_commands("""
             main() { takeoff(); left(1); land(); }
         """)
-        expected = [Command.takeoff(), Command.left(1), Command.land()]
+        expected = [SingleDroneCommand("default", Command.takeoff()),
+                    SingleDroneCommand("default", Command.left(1)),
+                    SingleDroneCommand("default", Command.land())]
         self.assertEqual(expected, actual)
 
     def test_left_with_decimal_parameter_should_return_correct_command(self):
         actual = generate_commands("""
             main() { takeoff(); left(1.0); land(); }
         """)
-        expected = [Command.takeoff(), Command.left(1.0), Command.land()]
+        expected = [SingleDroneCommand("default", Command.takeoff()),
+                    SingleDroneCommand("default", Command.left(1.0)),
+                    SingleDroneCommand("default", Command.land())]
         self.assertEqual(expected, actual)
 
     def test_left_with_incorrect_parameter_should_give_error(self):
@@ -122,14 +136,18 @@ class MovementCommandsTest(unittest.TestCase):
         actual = generate_commands("""
             main() { takeoff(); right(1); land(); }
         """)
-        expected = [Command.takeoff(), Command.right(1), Command.land()]
+        expected = [SingleDroneCommand("default", Command.takeoff()),
+                    SingleDroneCommand("default", Command.right(1)),
+                    SingleDroneCommand("default", Command.land())]
         self.assertEqual(expected, actual)
 
     def test_right_with_decimal_parameter_should_return_correct_command(self):
         actual = generate_commands("""
             main() { takeoff(); right(1.0); land(); }
         """)
-        expected = [Command.takeoff(), Command.right(1.0), Command.land()]
+        expected = [SingleDroneCommand("default", Command.takeoff()),
+                    SingleDroneCommand("default", Command.right(1.0)),
+                    SingleDroneCommand("default", Command.land())]
         self.assertEqual(expected, actual)
 
     def test_right_with_incorrect_parameter_should_give_error(self):
@@ -154,14 +172,18 @@ class MovementCommandsTest(unittest.TestCase):
         actual = generate_commands("""
             main() { takeoff(); forward(1); land(); }
         """)
-        expected = [Command.takeoff(), Command.forward(1), Command.land()]
+        expected = [SingleDroneCommand("default", Command.takeoff()),
+                    SingleDroneCommand("default", Command.forward(1)),
+                    SingleDroneCommand("default", Command.land())]
         self.assertEqual(expected, actual)
 
     def test_forward_with_decimal_parameter_should_return_correct_command(self):
         actual = generate_commands("""
             main() { takeoff(); forward(1.0); land(); }
         """)
-        expected = [Command.takeoff(), Command.forward(1.0), Command.land()]
+        expected = [SingleDroneCommand("default", Command.takeoff()),
+                    SingleDroneCommand("default", Command.forward(1.0)),
+                    SingleDroneCommand("default", Command.land())]
         self.assertEqual(expected, actual)
 
     def test_forward_with_incorrect_parameter_should_give_error(self):
@@ -186,14 +208,18 @@ class MovementCommandsTest(unittest.TestCase):
         actual = generate_commands("""
             main() { takeoff(); backward(1); land(); }
         """)
-        expected = [Command.takeoff(), Command.backward(1), Command.land()]
+        expected = [SingleDroneCommand("default", Command.takeoff()),
+                    SingleDroneCommand("default", Command.backward(1)),
+                    SingleDroneCommand("default", Command.land())]
         self.assertEqual(expected, actual)
 
     def test_backward_with_decimal_parameter_should_return_correct_command(self):
         actual = generate_commands("""
             main() { takeoff(); backward(1.0); land(); }
         """)
-        expected = [Command.takeoff(), Command.backward(1.0), Command.land()]
+        expected = [SingleDroneCommand("default", Command.takeoff()),
+                    SingleDroneCommand("default", Command.backward(1.0)),
+                    SingleDroneCommand("default", Command.land())]
         self.assertEqual(expected, actual)
 
     def test_backward_with_incorrect_parameter_should_give_error(self):
@@ -218,14 +244,18 @@ class MovementCommandsTest(unittest.TestCase):
         actual = generate_commands("""
             main() { takeoff(); rotate_left(1); land(); }
         """)
-        expected = [Command.takeoff(), Command.rotate_left(1), Command.land()]
+        expected = [SingleDroneCommand("default", Command.takeoff()),
+                    SingleDroneCommand("default", Command.rotate_left(1)),
+                    SingleDroneCommand("default", Command.land())]
         self.assertEqual(expected, actual)
 
     def test_rotate_left_with_decimal_parameter_should_return_correct_command(self):
         actual = generate_commands("""
             main() { takeoff(); rotate_left(1.0); land(); }
         """)
-        expected = [Command.takeoff(), Command.rotate_left(1.0), Command.land()]
+        expected = [SingleDroneCommand("default", Command.takeoff()),
+                    SingleDroneCommand("default", Command.rotate_left(1.0)),
+                    SingleDroneCommand("default", Command.land())]
         self.assertEqual(expected, actual)
 
     def test_rotate_left_with_incorrect_parameter_should_give_error(self):
@@ -250,14 +280,18 @@ class MovementCommandsTest(unittest.TestCase):
         actual = generate_commands("""
             main() { takeoff(); rotate_right(1); land(); }
         """)
-        expected = [Command.takeoff(), Command.rotate_right(1), Command.land()]
+        expected = [SingleDroneCommand("default", Command.takeoff()),
+                    SingleDroneCommand("default", Command.rotate_right(1)),
+                    SingleDroneCommand("default", Command.land())]
         self.assertEqual(expected, actual)
 
     def test_rotate_right_with_decimal_parameter_should_return_correct_command(self):
         actual = generate_commands("""
             main() { takeoff(); rotate_right(1.0); land(); }
         """)
-        expected = [Command.takeoff(), Command.rotate_right(1.0), Command.land()]
+        expected = [SingleDroneCommand("default", Command.takeoff()),
+                    SingleDroneCommand("default", Command.rotate_right(1)),
+                    SingleDroneCommand("default", Command.land())]
         self.assertEqual(expected, actual)
 
     def test_rotate_right_with_incorrect_parameter_should_give_error(self):
@@ -282,14 +316,14 @@ class MovementCommandsTest(unittest.TestCase):
         actual = generate_commands("""
             main() { wait(1); }
         """)
-        expected = [Command.wait(1)]
+        expected = [SingleDroneCommand("default", Command.wait(1))]
         self.assertEqual(expected, actual)
 
     def test_wait_with_decimal_parameter_should_return_correct_command(self):
         actual = generate_commands("""
             main() { wait(1.0); }
         """)
-        expected = [Command.wait(1.0)]
+        expected = [SingleDroneCommand("default", Command.wait(1.0))]
         self.assertEqual(expected, actual)
 
     def test_wait_with_incorrect_parameter_should_give_error(self):
@@ -324,7 +358,15 @@ class MovementCommandsTest(unittest.TestCase):
              land(); 
             }
         """)
-        expected = [Command.takeoff(), Command.up(1), Command.down(2), Command.left(3), Command.right(4),
-                    Command.forward(5), Command.backward(6), Command.rotate_left(7), Command.rotate_right(8),
-                    Command.wait(9), Command.land()]
+        expected = [SingleDroneCommand("default", Command.takeoff()),
+                    SingleDroneCommand("default", Command.up(1)),
+                    SingleDroneCommand("default", Command.down(2)),
+                    SingleDroneCommand("default", Command.left(3)),
+                    SingleDroneCommand("default", Command.right(4)),
+                    SingleDroneCommand("default", Command.forward(5)),
+                    SingleDroneCommand("default", Command.backward(6)),
+                    SingleDroneCommand("default", Command.rotate_left(7)),
+                    SingleDroneCommand("default", Command.rotate_right(8)),
+                    SingleDroneCommand("default", Command.wait(9)),
+                    SingleDroneCommand("default", Command.land())]
         self.assertEqual(expected, actual)

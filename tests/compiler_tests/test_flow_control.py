@@ -1,11 +1,11 @@
 import unittest
 
 from xdrone import generate_commands
-from xdrone.shared.compile_error import CompileError
 from xdrone.compiler.compiler_utils.expressions import Expression
 from xdrone.compiler.compiler_utils.symbol_table import SymbolTable
 from xdrone.compiler.compiler_utils.type import Type
-from xdrone.shared.command import Command
+from xdrone.shared.command import Command, SingleDroneCommand
+from xdrone.shared.compile_error import CompileError
 
 
 class IfTest(unittest.TestCase):
@@ -24,7 +24,9 @@ class IfTest(unittest.TestCase):
         expected_st = SymbolTable()
         expected_st.store("a", Expression(Type.int(), 1, ident="a"))
         self.assertEqual(expected_st, actual_st)
-        expected_commands = [Command.takeoff(), Command.forward(1), Command.land()]
+        expected_commands = [SingleDroneCommand("default", Command.takeoff()),
+                             SingleDroneCommand("default", Command.forward(1)),
+                             SingleDroneCommand("default", Command.land())]
         self.assertEqual(expected_commands, actual_commands)
 
     def test_if_true_with_else_should_run_correct_commands(self):
@@ -45,7 +47,9 @@ class IfTest(unittest.TestCase):
         expected = SymbolTable()
         expected.store("a", Expression(Type.int(), 1, ident="a"))
         self.assertEqual(expected, actual)
-        expected_commands = [Command.takeoff(), Command.forward(1), Command.land()]
+        expected_commands = [SingleDroneCommand("default", Command.takeoff()),
+                             SingleDroneCommand("default", Command.forward(1)),
+                             SingleDroneCommand("default", Command.land())]
         self.assertEqual(expected_commands, actual_commands)
 
     def test_if_false_without_else_should_do_nothing(self):
@@ -82,7 +86,9 @@ class IfTest(unittest.TestCase):
         expected.store("a", Expression(Type.int(), 2, ident="a"))
         expected.store("b", Expression(Type.int(), 3, ident="b"))
         self.assertEqual(expected, actual)
-        expected_commands = [Command.takeoff(), Command.forward(3), Command.land()]
+        expected_commands = [SingleDroneCommand("default", Command.takeoff()),
+                             SingleDroneCommand("default", Command.forward(3)),
+                             SingleDroneCommand("default", Command.land())]
         self.assertEqual(expected_commands, actual_commands)
 
     def test_if_with_error_commands_not_entering_should_not_give_error(self):
@@ -96,7 +102,8 @@ class IfTest(unittest.TestCase):
               land();
             }
             """)
-        expected_commands = [Command.takeoff(), Command.land()]
+        expected_commands = [SingleDroneCommand("default", Command.takeoff()),
+                             SingleDroneCommand("default", Command.land())]
         self.assertEqual(expected_commands, actual_commands)
 
     def test_if_wrong_type_should_give_error(self):
@@ -137,7 +144,9 @@ class WhileTest(unittest.TestCase):
         expected = SymbolTable()
         expected.store("a", Expression(Type.int(), 5, ident="a"))
         self.assertEqual(expected, actual)
-        expected_commands = [Command.takeoff()] + [Command.forward(i) for i in [2, 3, 4, 5]] + [Command.land()]
+        expected_commands = [SingleDroneCommand("default", Command.takeoff())] + \
+                            [SingleDroneCommand("default", Command.forward(i)) for i in [2, 3, 4, 5]] + \
+                            [SingleDroneCommand("default", Command.land())]
         self.assertEqual(expected_commands, actual_commands)
 
     def test_while_false_should_not_enter_loop(self):
@@ -156,7 +165,8 @@ class WhileTest(unittest.TestCase):
         expected = SymbolTable()
         expected.store("a", Expression(Type.int(), 10, ident="a"))
         self.assertEqual(expected, actual)
-        expected_commands = [Command.takeoff(), Command.land()]
+        expected_commands = [SingleDroneCommand("default", Command.takeoff()),
+                             SingleDroneCommand("default", Command.land())]
         self.assertEqual(expected_commands, actual_commands)
 
     def test_while_with_error_command_not_entering_should_not_give_error(self):
@@ -209,7 +219,9 @@ class ForTest(unittest.TestCase):
         expected_st.store("i", Expression(Type.int(), 5, ident="i"))
         expected_st.store("a", Expression(Type.int(), 6, ident="a"))
         self.assertEqual(expected_st, actual_st)
-        expected_commands = [Command.takeoff()] + [Command.forward(i) for i in [0, 1, 2, 3, 4, 5]] + [Command.land()]
+        expected_commands = [SingleDroneCommand("default", Command.takeoff())] + \
+                            [SingleDroneCommand("default", Command.forward(i)) for i in [0, 1, 2, 3, 4, 5]] + \
+                            [SingleDroneCommand("default", Command.land())]
         self.assertEqual(expected_commands, actual_commands)
 
     def test_for_with_step_should_run_correct_commands_and_update_symbol_table(self):
@@ -230,7 +242,9 @@ class ForTest(unittest.TestCase):
         expected_st.store("i", Expression(Type.int(), 8, ident="i"))
         expected_st.store("a", Expression(Type.int(), 5, ident="a"))
         self.assertEqual(expected_st, actual_st)
-        expected_commands = [Command.takeoff()] + [Command.forward(i) for i in [0, 2, 4, 6, 8]] + [Command.land()]
+        expected_commands = [SingleDroneCommand("default", Command.takeoff())] + \
+                            [SingleDroneCommand("default", Command.forward(i)) for i in [0, 2, 4, 6, 8]] + \
+                            [SingleDroneCommand("default", Command.land())]
         self.assertEqual(expected_commands, actual_commands)
 
     def test_for_not_entering_should_not_update_symbol_table(self):
@@ -251,7 +265,8 @@ class ForTest(unittest.TestCase):
         expected_st.store("i", Expression(Type.int(), 0, ident="i"))
         expected_st.store("a", Expression(Type.int(), 0, ident="a"))
         self.assertEqual(expected_st, actual_st)
-        expected_commands = [Command.takeoff(), Command.land()]
+        expected_commands = [SingleDroneCommand("default", Command.takeoff()),
+                             SingleDroneCommand("default", Command.land())]
         self.assertEqual(expected_commands, actual_commands)
 
     def test_for_with_error_commands_not_entering_should_not_give_error(self):
@@ -362,7 +377,9 @@ class RepeatTest(unittest.TestCase):
               land();
             }
             """)
-        expected_commands = [Command.takeoff()] + [Command.forward(1) for _ in range(4)] + [Command.land()]
+        expected_commands = [SingleDroneCommand("default", Command.takeoff())] + \
+                            [SingleDroneCommand("default", Command.forward(1)) for _ in range(4)] + \
+                            [SingleDroneCommand("default", Command.land())]
         self.assertEqual(expected_commands, actual_commands)
 
     def test_repeat_with_wrong_type_expr_should_give_error(self):

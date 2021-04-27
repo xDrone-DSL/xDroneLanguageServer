@@ -1,6 +1,7 @@
 import unittest
 
-from xdrone.shared.command import Command
+from xdrone.shared.command import Command, SingleDroneCommand, ParallelDroneCommands, AbstractDroneCommand, \
+    RepeatDroneNameException
 
 
 class TestCommands(unittest.TestCase):
@@ -98,3 +99,130 @@ class TestCommands(unittest.TestCase):
         self.assertEqual([1], Command.forward(1).operands)
         self.assertEqual("corrupted", corrupted_command.opcode)
         self.assertEqual([1], corrupted_command.operands)
+
+
+class TestAbstractDroneCommands(unittest.TestCase):
+
+    def test_get_drones_involved(self):
+        with self.assertRaises(NotImplementedError) as context:
+            AbstractDroneCommand().get_drones_involved()
+
+
+class TestSingleDroneCommand(unittest.TestCase):
+
+    def test_properties(self):
+        drone_command = SingleDroneCommand("abc", Command.takeoff())
+        self.assertEqual("abc", drone_command.drone_name)
+        self.assertEqual(Command.takeoff(), drone_command.command)
+
+    def test_get_drones_involved(self):
+        drone_command = SingleDroneCommand("abc", Command.takeoff())
+        self.assertEqual({"abc"}, drone_command.get_drones_involved())
+
+    def test_str(self):
+        drone_command = SingleDroneCommand("abc", Command.takeoff())
+        self.assertEqual("SingleDroneCommand: { drone_name: abc, command: Command: { opcode: takeoff, operands: [] } }",
+                         str(drone_command))
+
+    def test_repr(self):
+        drone_command = SingleDroneCommand("abc", Command.takeoff())
+        self.assertEqual("SingleDroneCommand: { drone_name: abc, command: Command: { opcode: takeoff, operands: [] } }",
+                         repr(drone_command))
+
+    def test_eq(self):
+        self.assertEqual(SingleDroneCommand("abc", Command.takeoff()), SingleDroneCommand("abc", Command.takeoff()))
+        self.assertNotEqual(SingleDroneCommand("", Command.takeoff()), SingleDroneCommand("abc", Command.takeoff()))
+        self.assertNotEqual(SingleDroneCommand("abc", Command.takeoff()), SingleDroneCommand("abc", Command.land()))
+        self.assertNotEqual(None, SingleDroneCommand("abc", Command.takeoff()))
+
+    def test_immutable(self):
+        drone_command = SingleDroneCommand("abc", Command.takeoff())
+        drone_name = drone_command.drone_name
+        command = drone_command.command
+        drone_name += "corrupted"
+        command._opcode = "corrupted"
+        self.assertEqual("abc", drone_command.drone_name)
+        self.assertEqual(Command.takeoff(), drone_command.command)
+
+
+class TestRepeatDroneNameException(unittest.TestCase):
+
+    def test_properties(self):
+        exception = RepeatDroneNameException({"abc"})
+        self.assertEqual({"abc"}, exception.repeated_names)
+
+    def test_immutable(self):
+        exception = RepeatDroneNameException({"abc"})
+        exception.repeated_names.add("corrupted")
+        self.assertEqual({"abc"}, exception.repeated_names)
+
+
+class TestParallelCommands(unittest.TestCase):
+
+    def test_properties(self):
+        parallel_commands = ParallelDroneCommands()
+        self.assertEqual([], parallel_commands.branches)
+        parallel_commands = ParallelDroneCommands([[], []])
+        self.assertEqual([[], []], parallel_commands.branches)
+
+    def test_get_drones_involved(self):
+        parallel_commands = ParallelDroneCommands()
+        self.assertEqual(set(), parallel_commands.get_drones_involved())
+        parallel_commands = ParallelDroneCommands([[SingleDroneCommand("drone1", Command.takeoff())],
+                                                   [SingleDroneCommand("drone2", Command.takeoff())],
+                                                   [ParallelDroneCommands([
+                                                       [SingleDroneCommand("drone3", Command.takeoff())],
+                                                       [SingleDroneCommand("drone4", Command.takeoff())]
+                                                   ])]])
+        self.assertEqual({"drone1", "drone2", "drone3", "drone4"}, parallel_commands.get_drones_involved())
+
+    def test_add(self):
+        parallel_commands = ParallelDroneCommands()
+        parallel_commands.add([])
+        self.assertEqual([[]], parallel_commands.branches)
+        parallel_commands.add([SingleDroneCommand("abc", Command.takeoff())])
+        self.assertEqual([[], [SingleDroneCommand("abc", Command.takeoff())]], parallel_commands.branches)
+
+    def test_add_already_involved_drones_should_give_error(self):
+        parallel_commands = ParallelDroneCommands()
+        parallel_commands.add([SingleDroneCommand("drone1", Command.takeoff())])
+        with self.assertRaises(RepeatDroneNameException) as context:
+            parallel_commands.add([SingleDroneCommand("drone1", Command.takeoff())])
+        self.assertTrue({"drone1"}, context.exception.repeated_names)
+
+    def test_init_with_repeated_drones_should_give_error(self):
+        with self.assertRaises(RepeatDroneNameException) as context:
+            ParallelDroneCommands([
+                [SingleDroneCommand("drone1", Command.takeoff())],
+                [SingleDroneCommand("drone1", Command.takeoff())]
+            ])
+        self.assertTrue({"drone1"}, context.exception.repeated_names)
+
+    def test_str(self):
+        parallel_commands = ParallelDroneCommands()
+        parallel_commands.add([])
+        parallel_commands.add([SingleDroneCommand("abc", Command.takeoff())])
+        self.assertEqual("ParallelDroneCommands: { [], " +
+                         "[SingleDroneCommand: { drone_name: abc, " +
+                         "command: Command: { opcode: takeoff, operands: [] } }] }",
+                         str(parallel_commands))
+
+    def test_repr(self):
+        parallel_commands = ParallelDroneCommands()
+        parallel_commands.add([])
+        parallel_commands.add([SingleDroneCommand("abc", Command.takeoff())])
+        self.assertEqual("ParallelDroneCommands: { [], " +
+                         "[SingleDroneCommand: { drone_name: abc, " +
+                         "command: Command: { opcode: takeoff, operands: [] } }] }",
+                         repr(parallel_commands))
+
+    def test_eq(self):
+        parallel_commands1 = ParallelDroneCommands()
+        parallel_commands1.add([])
+        parallel_commands1.add([SingleDroneCommand("abc", Command.takeoff())])
+        parallel_commands2 = ParallelDroneCommands([[], [SingleDroneCommand("abc", Command.takeoff())]])
+        parallel_commands3 = ParallelDroneCommands([[SingleDroneCommand("abc", Command.takeoff())], []])
+        self.assertEqual(ParallelDroneCommands(), ParallelDroneCommands())
+        self.assertEqual(parallel_commands1, parallel_commands2)
+        self.assertNotEqual(parallel_commands1, parallel_commands3)
+        self.assertNotEqual(None, parallel_commands1)

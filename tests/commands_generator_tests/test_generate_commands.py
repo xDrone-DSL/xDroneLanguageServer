@@ -1,19 +1,19 @@
 import unittest
 
 from xdrone import generate_commands
-from xdrone.shared.compile_error import CompileError, XDroneSyntaxError
-from xdrone.shared.command import Command
-from xdrone.shared.drone_config import DroneConfig
-from xdrone.shared.safety_config import SafetyConfig
-from xdrone.shared.safety_check_error import SafetyCheckError
 from xdrone.safety_checker.safety_checker import SafetyChecker
+from xdrone.shared.command import Command, SingleDroneCommand
+from xdrone.shared.compile_error import CompileError, XDroneSyntaxError
+from xdrone.shared.drone_config import DroneConfig
+from xdrone.shared.safety_check_error import SafetyCheckError
+from xdrone.shared.safety_config import SafetyConfig
 from xdrone.state_updaters.state_updater import StateUpdater
 
 
 class GenerateCommandsTest(unittest.TestCase):
     def test_basic_program(self):
         commands = "main() {takeoff(); land();}"
-        expected = [Command.takeoff(), Command.land()]
+        expected = [SingleDroneCommand("default", Command.takeoff()), SingleDroneCommand("default", Command.land())]
         self.assertEqual(expected, generate_commands(commands))
 
     def test_syntax_error_should_be_reported(self):
@@ -43,8 +43,8 @@ class GenerateCommandsTest(unittest.TestCase):
         commands = "main() {takeoff(); land();}"
         with self.assertRaises(SafetyCheckError) as context:
             generate_commands(commands,
-                              state_updater=StateUpdater(DroneConfig(speed_mps=1, rotate_speed_dps=90,
-                                                                     takeoff_height_meters=10)),
+                              state_updaters={"default": StateUpdater(DroneConfig(speed_mps=1, rotate_speed_dps=90,
+                                                                                  takeoff_height_meters=10))},
                               safety_checker=SafetyChecker(SafetyConfig(max_seconds=10, max_z_meters=1)))
         self.assertTrue("The z coordinate 10 will go beyond its upper limit 1" in str(context.exception))
 

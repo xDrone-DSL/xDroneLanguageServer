@@ -1,12 +1,12 @@
 import unittest
 
 from xdrone import generate_commands
-from xdrone.shared.compile_error import CompileError
 from xdrone.compiler.compiler_utils.expressions import Expression
 from xdrone.compiler.compiler_utils.functions import FunctionTable, Function, Parameter
 from xdrone.compiler.compiler_utils.symbol_table import SymbolTable
 from xdrone.compiler.compiler_utils.type import Type
-from xdrone.shared.command import Command
+from xdrone.shared.command import Command, SingleDroneCommand
+from xdrone.shared.compile_error import CompileError
 
 
 class FunctionDefinitionTest(unittest.TestCase):
@@ -235,7 +235,11 @@ class ProcedureCallTest(unittest.TestCase):
               land();
             }
             """)
-        self.assertEqual([Command.takeoff(), Command.up(300), Command.down(100), Command.land()], commands)
+        expected_commands = [SingleDroneCommand("default", Command.takeoff()),
+                             SingleDroneCommand("default", Command.up(300)),
+                             SingleDroneCommand("default", Command.down(100)),
+                             SingleDroneCommand("default", Command.land())]
+        self.assertEqual(expected_commands, commands)
 
     def test_procedure_error_but_not_called_should_not_give_error(self):
         commands = generate_commands("""
@@ -325,8 +329,12 @@ class FunctionCallTest(unittest.TestCase):
               land();
             }
             """)
-        self.assertEqual([Command.takeoff(), Command.up(300), Command.down(100), Command.forward(300), Command.land()],
-                         commands)
+        expected_commands = [SingleDroneCommand("default", Command.takeoff()),
+                             SingleDroneCommand("default", Command.up(300)),
+                             SingleDroneCommand("default", Command.down(100)),
+                             SingleDroneCommand("default", Command.forward(300)),
+                             SingleDroneCommand("default", Command.land())]
+        self.assertEqual(expected_commands, commands)
 
     def test_function_error_but_not_called_should_not_give_error(self):
         commands = generate_commands("""
@@ -411,7 +419,10 @@ class ComplexFunctionTest(unittest.TestCase):
               land();
             }
             """)
-        self.assertEqual([Command.takeoff(), Command.forward(10), Command.land()], commands)
+        expected_commands = [SingleDroneCommand("default", Command.takeoff()),
+                             SingleDroneCommand("default", Command.forward(10)),
+                             SingleDroneCommand("default", Command.land())]
+        self.assertEqual(expected_commands, commands)
 
     def test_loops_in_function(self):
         commands = generate_commands("""
@@ -427,7 +438,10 @@ class ComplexFunctionTest(unittest.TestCase):
               land();
             }
             """)
-        self.assertEqual([Command.takeoff(), Command.forward(10), Command.land()], commands)
+        expected_commands = [SingleDroneCommand("default", Command.takeoff()),
+                             SingleDroneCommand("default", Command.forward(10)),
+                             SingleDroneCommand("default", Command.land())]
+        self.assertEqual(expected_commands, commands)
 
     def test_function_procedure_in_function(self):
         commands = generate_commands("""
@@ -450,7 +464,11 @@ class ComplexFunctionTest(unittest.TestCase):
               land();
             }
             """)
-        self.assertEqual([Command.takeoff(), Command.forward(100), Command.forward(100), Command.land()], commands)
+        expected_commands = [SingleDroneCommand("default", Command.takeoff()),
+                             SingleDroneCommand("default", Command.forward(100)),
+                             SingleDroneCommand("default", Command.forward(100)),
+                             SingleDroneCommand("default", Command.land())]
+        self.assertEqual(expected_commands, commands)
 
     def test_scope(self):
         actual = SymbolTable()
@@ -469,7 +487,10 @@ class ComplexFunctionTest(unittest.TestCase):
               land();
             }
             """, symbol_table=actual)
-        self.assertEqual([Command.takeoff(), Command.forward(10), Command.land()], commands)
+        expected_commands = [SingleDroneCommand("default", Command.takeoff()),
+                             SingleDroneCommand("default", Command.forward(10)),
+                             SingleDroneCommand("default", Command.land())]
+        self.assertEqual(expected_commands, commands)
         expected = SymbolTable()
         expected.store("i", Expression(Type.int(), 1, ident="i"))
         self.assertEqual(expected, actual)
@@ -491,7 +512,10 @@ class ComplexProcedureTest(unittest.TestCase):
               land();
             }
             """)
-        self.assertEqual([Command.takeoff(), Command.forward(10), Command.land()], commands)
+        expected_commands = [SingleDroneCommand("default", Command.takeoff()),
+                             SingleDroneCommand("default", Command.forward(10)),
+                             SingleDroneCommand("default", Command.land())]
+        self.assertEqual(expected_commands, commands)
 
     def test_loops_in_function(self):
         commands = generate_commands("""
@@ -507,7 +531,10 @@ class ComplexProcedureTest(unittest.TestCase):
               land();
             }
             """)
-        self.assertEqual([Command.takeoff(), Command.forward(10), Command.land()], commands)
+        expected_commands = [SingleDroneCommand("default", Command.takeoff()),
+                             SingleDroneCommand("default", Command.forward(10)),
+                             SingleDroneCommand("default", Command.land())]
+        self.assertEqual(expected_commands, commands)
 
     def test_function_procedure_in_procedure(self):
         commands = generate_commands("""
@@ -527,7 +554,11 @@ class ComplexProcedureTest(unittest.TestCase):
               proc2();
             }
             """)
-        self.assertEqual([Command.takeoff(), Command.forward(100), Command.forward(100), Command.land()], commands)
+        expected_commands = [SingleDroneCommand("default", Command.takeoff()),
+                             SingleDroneCommand("default", Command.forward(100)),
+                             SingleDroneCommand("default", Command.forward(100)),
+                             SingleDroneCommand("default", Command.land())]
+        self.assertEqual(expected_commands, commands)
 
     def test_scope(self):
         actual = SymbolTable()

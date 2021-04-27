@@ -251,6 +251,24 @@ class xDroneParserListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by xDroneParser#parallel.
+    def enterParallel(self, ctx:xDroneParser.ParallelContext):
+        pass
+
+    # Exit a parse tree produced by xDroneParser#parallel.
+    def exitParallel(self, ctx:xDroneParser.ParallelContext):
+        pass
+
+
+    # Enter a parse tree produced by xDroneParser#droneIdent.
+    def enterDroneIdent(self, ctx:xDroneParser.DroneIdentContext):
+        pass
+
+    # Exit a parse tree produced by xDroneParser#droneIdent.
+    def exitDroneIdent(self, ctx:xDroneParser.DroneIdentContext):
+        pass
+
+
     # Enter a parse tree produced by xDroneParser#ident.
     def enterIdent(self, ctx:xDroneParser.IdentContext):
         pass

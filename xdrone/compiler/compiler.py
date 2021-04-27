@@ -1,48 +1,47 @@
-from typing import List, Optional
+import copy
+from typing import List, Optional, Set
 
 from antlr.xDroneParser import xDroneParser
 from antlr.xDroneParserVisitor import xDroneParserVisitor
+from xdrone.compiler.compiler_utils.drones import DroneIdentifier
 from xdrone.compiler.compiler_utils.expressions import Identifier, ListElem, VectorElem, Expression
 from xdrone.compiler.compiler_utils.functions import FunctionTable, Function, Parameter, FunctionIdentifier
 from xdrone.compiler.compiler_utils.symbol_table import SymbolTable
 from xdrone.compiler.compiler_utils.type import Type, ListType, EmptyList
-from xdrone.shared.command import Command
+from xdrone.shared.command import Command, SingleDroneCommand, ParallelDroneCommands, AbstractDroneCommand, \
+    RepeatDroneNameException
 from xdrone.shared.compile_error import CompileError
 from xdrone.shared.state import State
-from xdrone.state_updaters.state_updater import StateUpdater
 
 
 class Compiler(xDroneParserVisitor):
 
-    def __init__(self, state_updater: StateUpdater, symbol_table: SymbolTable, function_table: FunctionTable):
+    def __init__(self, drones: Set[str], symbol_table: SymbolTable, function_table: FunctionTable):
         super().__init__()
-        self.state_updater = state_updater
+        self.drones = drones
         self.symbol_table = [symbol_table]
         self.function_table = function_table
 
         self.returned = [False]
         self.returned_value = []
-        self.commands = []
-        self.states = [State.init_state()]
+
+        self.commands = [[]]
 
     def _get_latest_symbol_table(self):
         return self.symbol_table[-1]
 
-    def _update_commands_and_states(self, command: Command) -> None:
-        self.commands.append(command)
-        self.states.append(self.state_updater.update(command, self.states[-1]))
+    def _get_latest_commands(self):
+        return self.commands[-1]
 
     ######## prog ########
 
-    def visitProg(self, ctx: xDroneParser.ProgContext) -> (List[Command], List[State]):
+    def visitProg(self, ctx: xDroneParser.ProgContext) -> List[AbstractDroneCommand]:
         for func in ctx.func():
             self.visit(func)
         self.visit(ctx.commands())
-        commands = self.commands
-        states = self.states
-        self.commands = []
-        self.states = [State.init_state()]
-        return commands, states
+        assert len(self.commands) == 1
+        commands = self.commands[0]
+        return commands
 
     ######## commands ########
 
@@ -54,65 +53,88 @@ class Compiler(xDroneParserVisitor):
 
     ######## command ########
 
+    def _get_drone_name(self, ctx):
+        if ctx.droneIdent():
+            drone_identifier = self.visit(ctx.droneIdent())
+            drone_name = drone_identifier.ident
+            if drone_name not in self.drones:
+                raise CompileError("Drone {} has not been defined in config".format(drone_name))
+        elif len(self.drones) == 1:
+            drone_name = list(self.drones)[0]
+        else:
+            raise CompileError("Drone name should be specified if there are multiple drones in config")
+        return drone_name
+
     def visitTakeoff(self, ctx: xDroneParser.TakeoffContext) -> None:
-        self._update_commands_and_states(Command.takeoff())
+        drone_name = self._get_drone_name(ctx)
+        self._get_latest_commands().append(SingleDroneCommand(drone_name, Command.takeoff()))
 
     def visitLand(self, ctx: xDroneParser.LandContext) -> None:
-        self._update_commands_and_states(Command.land())
+        drone_name = self._get_drone_name(ctx)
+        self._get_latest_commands().append(SingleDroneCommand(drone_name, Command.land()))
 
     def visitUp(self, ctx: xDroneParser.UpContext) -> None:
         expr = self.visit(ctx.expr())
         if expr.type != Type.int() and expr.type != Type.decimal():
             raise CompileError("Expression {} should have type int or decimal, but is {}".format(expr, expr.type))
-        self._update_commands_and_states(Command.up(expr.value))
+        drone_name = self._get_drone_name(ctx)
+        self._get_latest_commands().append(SingleDroneCommand(drone_name, Command.up(expr.value)))
 
     def visitDown(self, ctx: xDroneParser.DownContext) -> None:
         expr = self.visit(ctx.expr())
         if expr.type != Type.int() and expr.type != Type.decimal():
             raise CompileError("Expression {} should have type int or decimal, but is {}".format(expr, expr.type))
-        self._update_commands_and_states(Command.down(expr.value))
+        drone_name = self._get_drone_name(ctx)
+        self._get_latest_commands().append(SingleDroneCommand(drone_name, Command.down(expr.value)))
 
     def visitLeft(self, ctx: xDroneParser.LeftContext) -> None:
         expr = self.visit(ctx.expr())
         if expr.type != Type.int() and expr.type != Type.decimal():
             raise CompileError("Expression {} should have type int or decimal, but is {}".format(expr, expr.type))
-        self._update_commands_and_states(Command.left(expr.value))
+        drone_name = self._get_drone_name(ctx)
+        self._get_latest_commands().append(SingleDroneCommand(drone_name, Command.left(expr.value)))
 
     def visitRight(self, ctx: xDroneParser.RightContext) -> None:
         expr = self.visit(ctx.expr())
         if expr.type != Type.int() and expr.type != Type.decimal():
             raise CompileError("Expression {} should have type int or decimal, but is {}".format(expr, expr.type))
-        self._update_commands_and_states(Command.right(expr.value))
+        drone_name = self._get_drone_name(ctx)
+        self._get_latest_commands().append(SingleDroneCommand(drone_name, Command.right(expr.value)))
 
     def visitForward(self, ctx: xDroneParser.ForwardContext) -> None:
         expr = self.visit(ctx.expr())
         if expr.type != Type.int() and expr.type != Type.decimal():
             raise CompileError("Expression {} should have type int or decimal, but is {}".format(expr, expr.type))
-        self._update_commands_and_states(Command.forward(expr.value))
+        drone_name = self._get_drone_name(ctx)
+        self._get_latest_commands().append(SingleDroneCommand(drone_name, Command.forward(expr.value)))
 
     def visitBackward(self, ctx: xDroneParser.BackwardContext) -> None:
         expr = self.visit(ctx.expr())
         if expr.type != Type.int() and expr.type != Type.decimal():
             raise CompileError("Expression {} should have type int or decimal, but is {}".format(expr, expr.type))
-        self._update_commands_and_states(Command.backward(expr.value))
+        drone_name = self._get_drone_name(ctx)
+        self._get_latest_commands().append(SingleDroneCommand(drone_name, Command.backward(expr.value)))
 
     def visitRotateLeft(self, ctx: xDroneParser.RotateLeftContext) -> None:
         expr = self.visit(ctx.expr())
         if expr.type != Type.int() and expr.type != Type.decimal():
             raise CompileError("Expression {} should have type int or decimal, but is {}".format(expr, expr.type))
-        self._update_commands_and_states(Command.rotate_left(expr.value))
+        drone_name = self._get_drone_name(ctx)
+        self._get_latest_commands().append(SingleDroneCommand(drone_name, Command.rotate_left(expr.value)))
 
     def visitRotateRight(self, ctx: xDroneParser.RotateRightContext) -> None:
         expr = self.visit(ctx.expr())
         if expr.type != Type.int() and expr.type != Type.decimal():
             raise CompileError("Expression {} should have type int or decimal, but is {}".format(expr, expr.type))
-        self._update_commands_and_states(Command.rotate_right(expr.value))
+        drone_name = self._get_drone_name(ctx)
+        self._get_latest_commands().append(SingleDroneCommand(drone_name, Command.rotate_right(expr.value)))
 
     def visitWait(self, ctx: xDroneParser.WaitContext) -> None:
         expr = self.visit(ctx.expr())
         if expr.type != Type.int() and expr.type != Type.decimal():
             raise CompileError("Expression {} should have type int or decimal, but is {}".format(expr, expr.type))
-        self._update_commands_and_states(Command.wait(expr.value))
+        drone_name = self._get_drone_name(ctx)
+        self._get_latest_commands().append(SingleDroneCommand(drone_name, Command.wait(expr.value)))
 
     def visitDeclare(self, ctx: xDroneParser.DeclareContext) -> None:
         type, identifier = self.visit(ctx.type_()), self.visit(ctx.ident())
@@ -306,7 +328,39 @@ class Compiler(xDroneParserVisitor):
             expr = self.visit(ctx.expr())
             self.returned_value[-1] = Expression(expr.type, expr.value, ident=None)
 
+    def visitParallel(self, ctx: xDroneParser.ParallelContext) -> None:
+        parallel_commands = ParallelDroneCommands()
+        for commands in ctx.commands():
+            self.commands.append([])
+
+            # new scope
+            new_symbol_table = copy.deepcopy(self._get_latest_symbol_table())
+            self.symbol_table.append(new_symbol_table)
+            self.returned.append(False)
+            self.returned_value.append(None)
+            self.visit(commands)
+            returned_value = self.returned_value.pop(-1)
+            self.returned.pop(-1)
+            self.symbol_table.pop(-1)
+            if returned_value is not None:
+                raise CompileError("Parallel branch should not return anything, but {} is returned"
+                                   .format(returned_value))
+
+            branch = self.commands.pop(-1)
+            try:
+                parallel_commands.add(branch)
+            except RepeatDroneNameException as e:
+                raise CompileError("Parallel branches should have exclusive drone names, "
+                                   "but {} appeared in more than one branches"
+                                   .format(e.repeated_names))
+
+        self._get_latest_commands().append(parallel_commands)
+
     ######## ident ########
+
+    def visitDroneIdent(self, ctx: xDroneParser.DroneIdentContext) -> DroneIdentifier:
+        ident = ctx.IDENT().getText()
+        return DroneIdentifier(str(ident))
 
     def visitIdent(self, ctx: xDroneParser.IdentContext) -> Identifier:
         ident = ctx.IDENT().getText()
