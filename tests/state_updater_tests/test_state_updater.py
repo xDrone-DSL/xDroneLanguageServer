@@ -9,7 +9,8 @@ from xdrone.state_updaters.state_updater import StateUpdater
 
 class StateUpdaterTest(unittest.TestCase):
     def setUp(self) -> None:
-        self.drone_config = DroneConfig(speed_mps=0.5, rotate_speed_dps=45, takeoff_height_meters=1)
+        self.drone_config = DroneConfig(init_position=(0, 0, 0), speed_mps=0.5,
+                                        rotate_speed_dps=45, takeoff_height_meters=1)
         self.state_updater = StateUpdater(drone_config=self.drone_config)
 
     def test_update_takeoff_should_update_state(self):

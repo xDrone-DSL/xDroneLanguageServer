@@ -54,8 +54,8 @@ def _parse_program(program):
 
 
 def generate_commands_with_config(program, config_json):
-    drone_config, safety_config = ConfigParser.parse(config_json)  # TODO: change drone config and its parser
-    state_updaters = StateUpdater(drone_config)  # TODO: should be a dict now
+    drone_config_map, safety_config = ConfigParser.parse(config_json)
+    state_updaters = {name: StateUpdater(config) for name, config in drone_config_map}
     safety_checker = SafetyChecker(safety_config)
     return generate_commands(program, state_updaters, safety_checker)
 

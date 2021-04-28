@@ -1,5 +1,6 @@
 import json
 from logging import warning
+from typing import Dict
 
 from xdrone.shared.drone_config import DroneConfig, DefaultDroneConfig
 from xdrone.shared.safety_config import SafetyConfig
@@ -7,40 +8,79 @@ from xdrone.shared.safety_config import SafetyConfig
 
 class ConfigParser:
     @staticmethod
-    def parse(json_str: str) -> (DroneConfig, SafetyConfig):
+    def parse(json_str: str) -> (Dict[str, DroneConfig], SafetyConfig):
         data = json.loads(json_str)
-        drone_config = ConfigParser._parse_drone_config(data)
+        drone_config_map = ConfigParser._parse_drone_config(data)
         safety_config = ConfigParser._parse_safety_config(data)
-        return drone_config, safety_config
+        return drone_config_map, safety_config
 
     @staticmethod
-    def _parse_drone_config(data: dict) -> DroneConfig:
-        if "drone_config" in data:
-            if "speed_mps" in data["drone_config"]:
-                speed_mps = data["drone_config"]["speed_mps"]
-            else:
-                warning("'speed_mps' missing when parsing 'drone_config', using default value 1. " +
+    def _parse_drone_config(data: dict) -> Dict[str, DroneConfig]:
+        drone_config_map = {}
+        if "drones" in data:
+            if len(data["drones"]) == 0:
+                warning("'drones' is empty when parsing configs, using default drone_config. " +
                         "Position estimation may be inaccurate.")
-                speed_mps = 1
-            if "rotate_speed_dps" in data["drone_config"]:
-                rotate_speed_dps = data["drone_config"]["rotate_speed_dps"]
-            else:
-                warning("'rotate_speed_dps' missing when parsing 'drone_config', using default value 90. " +
-                        "Position estimation may be inaccurate.")
-                rotate_speed_dps = 90
-            if "takeoff_height_meters" in data["drone_config"]:
-                takeoff_height_meters = data["drone_config"]["takeoff_height_meters"]
-            else:
-                warning("'takeoff_height_meters' missing when parsing 'drone_config', " +
-                        "using default value 1. " +
-                        "Position estimation may be inaccurate.")
-                takeoff_height_meters = 1
-            drone_config = DroneConfig(speed_mps, rotate_speed_dps, takeoff_height_meters)
+                return {"default": DefaultDroneConfig()}
+            for drone in data["drones"]:
+                if "name" in drone:
+                    name = drone["name"]
+                    if name == "":
+                        warning("'name' cannot be an empty string, using default value 'default' instead.")
+                        name = "default"
+                else:
+                    warning("'name' missing when parsing object in 'drones', using default value 'default'.")
+                    name = "default"
+
+                if name in drone_config_map:
+                    warning("Drone name '{}' appeared more than ones in 'drones', ignored.".format(name))
+                    continue
+
+                if "init_position" in drone:
+                    position = drone["init_position"]
+                    init_position = []
+                    for dim in ["x", "y", "z"]:
+                        if dim in position:
+                            init_position.append(position[dim])
+                        else:
+                            warning("'{}' missing when parsing drone '{}', using default value 0. ".format(dim, name) +
+                                    "Position estimation may be inaccurate.")
+                            init_position.append(0)
+                    init_position = tuple(init_position)
+                else:
+                    warning("'init_position' missing when parsing drone '{}', ".format(name) +
+                            "using default value (0, 0, 0). " +
+                            "Position estimation may be inaccurate.")
+                    init_position = (0, 0, 0)
+                if "speed_mps" in drone:
+                    speed_mps = drone["speed_mps"]
+                else:
+                    warning("'speed_mps' missing when parsing drone '{}', ".format(name) +
+                            "using default value 1. " +
+                            "Position estimation may be inaccurate.")
+                    speed_mps = 1
+                if "rotate_speed_dps" in drone:
+                    rotate_speed_dps = drone["rotate_speed_dps"]
+                else:
+                    warning("'rotate_speed_dps' missing when parsing drone '{}', ".format(name) +
+                            "using default value 90. " +
+                            "Position estimation may be inaccurate.")
+                    rotate_speed_dps = 90
+                if "takeoff_height_meters" in drone:
+                    takeoff_height_meters = drone["takeoff_height_meters"]
+                else:
+                    warning("'takeoff_height_meters' missing when parsing drone '{}', ".format(name) +
+                            "using default value 1. " +
+                            "Position estimation may be inaccurate.")
+                    takeoff_height_meters = 1
+
+                drone_config = DroneConfig(init_position, speed_mps, rotate_speed_dps, takeoff_height_meters)
+                drone_config_map[name] = drone_config
         else:
-            warning("'drone_config' missing when parsing configs, using default drone_config. " +
+            warning("'drones' missing when parsing configs, using default drone_config. " +
                     "Position estimation may be inaccurate.")
-            drone_config = DefaultDroneConfig()
-        return drone_config
+            return {"default": DefaultDroneConfig()}
+        return drone_config_map
 
     @staticmethod
     def _parse_safety_config(data: dict) -> SafetyConfig:
