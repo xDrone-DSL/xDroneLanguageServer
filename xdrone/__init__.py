@@ -32,7 +32,7 @@ def generate_commands(program, state_updaters: Dict[str, StateUpdater] = None, s
 
     drone_commands = Compiler(drones, symbol_table, function_table).visit(tree)
 
-    # safety_checker.check(drone_commands, state_updaters)
+    safety_checker.check(drone_commands, state_updaters)
 
     return drone_commands
 
@@ -58,17 +58,3 @@ def generate_commands_with_config(program, config_json):
     state_updaters = {name: StateUpdater(config) for name, config in drone_config_map}
     safety_checker = SafetyChecker(safety_config)
     return generate_commands(program, state_updaters, safety_checker)
-
-
-if __name__ == '__main__':
-    cs = generate_commands("""
-    main() {
-    int i <- 1;
-    hello.takeoff();
-    {i <- i + 1 ; hello.up(i);} || {hello2.takeoff();hello2.up(i);hello2.land();};
-    hello.up(i);
-    hello.land();
-    }
-    """, state_updaters={"hello": StateUpdater(DefaultDroneConfig()), "hello2": StateUpdater(DefaultDroneConfig())})
-    for c in cs:
-        print(c)

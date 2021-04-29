@@ -13,8 +13,15 @@ class StateUpdaterTest(unittest.TestCase):
                                         rotate_speed_dps=45, takeoff_height_meters=1)
         self.state_updater = StateUpdater(drone_config=self.drone_config)
 
+    def test_get_init_state(self):
+        self.assertEqual(State(x_meters=0, y_meters=0, z_meters=0), self.state_updater.get_init_state())
+        drone_config = DroneConfig(init_position=(1, 2, 3), speed_mps=0.5,
+                                   rotate_speed_dps=45, takeoff_height_meters=1)
+        state_updater = StateUpdater(drone_config=drone_config)
+        self.assertEqual(State(x_meters=1, y_meters=2, z_meters=3), state_updater.get_init_state())
+
     def test_update_takeoff_should_update_state(self):
-        state = State.init_state()
+        state = State()
         actual = self.state_updater.update(Command.takeoff(), state)
         expected = State(has_taken_off=True, time_used_seconds=self.drone_config.takeoff_height_meters / 0.5,
                          z_meters=self.drone_config.takeoff_height_meters)

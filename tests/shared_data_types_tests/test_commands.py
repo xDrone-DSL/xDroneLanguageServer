@@ -162,8 +162,10 @@ class TestParallelCommands(unittest.TestCase):
     def test_properties(self):
         parallel_commands = ParallelDroneCommands()
         self.assertEqual([], parallel_commands.branches)
+        self.assertEqual([], parallel_commands.drones_involved_each_branch)
         parallel_commands = ParallelDroneCommands([[], []])
         self.assertEqual([[], []], parallel_commands.branches)
+        self.assertEqual([set(), set()], parallel_commands.drones_involved_each_branch)
 
     def test_get_drones_involved(self):
         parallel_commands = ParallelDroneCommands()
@@ -180,8 +182,10 @@ class TestParallelCommands(unittest.TestCase):
         parallel_commands = ParallelDroneCommands()
         parallel_commands.add([])
         self.assertEqual([[]], parallel_commands.branches)
+        self.assertEqual([set()], parallel_commands.drones_involved_each_branch)
         parallel_commands.add([SingleDroneCommand("abc", Command.takeoff())])
         self.assertEqual([[], [SingleDroneCommand("abc", Command.takeoff())]], parallel_commands.branches)
+        self.assertEqual([set(), {"abc"}], parallel_commands.drones_involved_each_branch)
 
     def test_add_already_involved_drones_should_give_error(self):
         parallel_commands = ParallelDroneCommands()

@@ -76,13 +76,17 @@ class ParallelTest(unittest.TestCase):
                 procedure foo() {
                   drone1.takeoff();
                   drone2.takeoff();
+                  drone1.land();
+                  drone2.land();
                 }
                 procedure bar() {
                   drone2.takeoff();
                   drone3.takeoff();
+                  drone2.land();
+                  drone3.land();
                 }
                 main() { 
-                  {foo();} || {bar();} || {drone3.takeoff();}; 
+                  {foo();} || {bar();} || {drone3.takeoff(); drone3.land();}; 
                 }
             """, state_updaters=state_updaters)
         self.assertTrue("Parallel branches should have exclusive drone names, " +
@@ -95,12 +99,12 @@ class ParallelTest(unittest.TestCase):
                           "drone3": StateUpdater(DefaultDroneConfig())}
         actual = generate_commands("""
             main() { 
-              {return; drone1.takeoff();} || {drone2.takeoff();} || {drone3.takeoff();}; 
+              {return; drone1.takeoff();} || {drone2.takeoff(); drone2.land();}; 
             }
         """, state_updaters=state_updaters)
         expected = [ParallelDroneCommands([[],
-                                           [SingleDroneCommand("drone2", Command.takeoff())],
-                                           [SingleDroneCommand("drone3", Command.takeoff())]])]
+                                           [SingleDroneCommand("drone2", Command.takeoff()),
+                                            SingleDroneCommand("drone2", Command.land())]])]
         self.assertEqual(expected, actual)
 
     def test_parallel_return_with_value_in_branch_should_give_error(self):
@@ -110,10 +114,9 @@ class ParallelTest(unittest.TestCase):
         with self.assertRaises(CompileError) as context:
             generate_commands("""
                 main() { 
-                  {return 1; drone1.takeoff();} || {drone2.takeoff();} || {drone3.takeoff();}; 
+                  {return 1; drone1.takeoff();} || {drone2.takeoff(); drone2.land();}; 
                 }
             """, state_updaters=state_updaters)
-        print(context.exception)
         self.assertTrue("Parallel branch should not return anything, but {} is returned"
                         .format(Expression(Type.int(), 1))
                         in str(context.exception))

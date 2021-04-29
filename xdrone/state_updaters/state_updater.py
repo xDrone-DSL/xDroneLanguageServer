@@ -22,6 +22,10 @@ class StateUpdater:
             "wait": self._update_wait
         }
 
+    def get_init_state(self) -> State:
+        (x, y, z) = self.drone_config.init_position
+        return State(x_meters=x, y_meters=y, z_meters=z)
+
     def update(self, command: Command, state: State) -> State:
         update_method = self.OPCODE_METHOD_MAP[command.opcode]
         return update_method(command, state)

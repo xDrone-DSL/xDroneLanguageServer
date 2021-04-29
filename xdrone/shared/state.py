@@ -14,11 +14,6 @@ class State:
         self._z_meters = z_meters
         self._orientation_degrees = orientation_degrees
 
-    @staticmethod
-    def init_state() -> State:
-        return State(has_taken_off=False, time_used_seconds=0,
-                     x_meters=0, y_meters=0, z_meters=0, orientation_degrees=0)
-
     @property
     def has_taken_off(self) -> bool:
         return copy.deepcopy(self._has_taken_off)

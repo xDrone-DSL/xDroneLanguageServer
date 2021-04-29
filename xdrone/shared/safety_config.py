@@ -42,25 +42,25 @@ class SafetyConfig:
                    and other._min_z_meters == self._min_z_meters
         return False
 
-    def check_state(self, state: State) -> None:
+    def check_state(self, drone_name: str, state: State) -> None:
         if state.x_meters > self._max_x_meters:
-            raise SafetyCheckError("The x coordinate {} will go beyond its upper limit {}"
-                                   .format(state.x_meters, self._max_x_meters))
+            raise SafetyCheckError("Drone '{}': the x coordinate {} will go beyond its upper limit {}"
+                                   .format(drone_name, state.x_meters, self._max_x_meters))
         if state.y_meters > self._max_y_meters:
-            raise SafetyCheckError("The y coordinate {} will go beyond its upper limit {}"
-                                   .format(state.y_meters, self._max_y_meters))
+            raise SafetyCheckError("Drone '{}': the y coordinate {} will go beyond its upper limit {}"
+                                   .format(drone_name, state.y_meters, self._max_y_meters))
         if state.z_meters > self._max_z_meters:
-            raise SafetyCheckError("The z coordinate {} will go beyond its upper limit {}"
-                                   .format(state.z_meters, self._max_z_meters))
+            raise SafetyCheckError("Drone '{}': the z coordinate {} will go beyond its upper limit {}"
+                                   .format(drone_name, state.z_meters, self._max_z_meters))
         if state.x_meters < self._min_x_meters:
-            raise SafetyCheckError("The x coordinate {} will go beyond its lower limit {}"
-                                   .format(state.x_meters, self._min_x_meters))
+            raise SafetyCheckError("Drone '{}': the x coordinate {} will go beyond its lower limit {}"
+                                   .format(drone_name, state.x_meters, self._min_x_meters))
         if state.y_meters < self._min_y_meters:
-            raise SafetyCheckError("The y coordinate {} will go beyond its lower limit {}"
-                                   .format(state.y_meters, self._min_y_meters))
+            raise SafetyCheckError("Drone '{}': the y coordinate {} will go beyond its lower limit {}"
+                                   .format(drone_name, state.y_meters, self._min_y_meters))
         if state.z_meters < self._min_z_meters:
-            raise SafetyCheckError("The z coordinate {} will go beyond its lower limit {}"
-                                   .format(state.z_meters, self._min_z_meters))
+            raise SafetyCheckError("Drone '{}': the z coordinate {} will go beyond its lower limit {}"
+                                   .format(drone_name, state.z_meters, self._min_z_meters))
         if state.time_used_seconds > self._max_seconds:
-            raise SafetyCheckError("The time used {} seconds will go beyond the time limit {} seconds"
-                                   .format(state.time_used_seconds, self._max_seconds))
+            raise SafetyCheckError("Drone '{}': the time used {} seconds will go beyond the time limit {} seconds"
+                                   .format(drone_name, state.time_used_seconds, self._max_seconds))

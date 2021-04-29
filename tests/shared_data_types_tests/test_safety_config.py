@@ -65,40 +65,47 @@ class SafetyConfigTest(unittest.TestCase):
         safety_config = SafetyConfig(max_seconds=0, max_x_meters=0, max_y_meters=0, max_z_meters=0,
                                      min_x_meters=0, min_y_meters=0, min_z_meters=0)
         with self.assertRaises(SafetyCheckError) as context:
-            safety_config.check_state(State(x_meters=10))
-        self.assertTrue("The x coordinate 10 will go beyond its upper limit 0" in str(context.exception))
+            safety_config.check_state('default', State(x_meters=10))
+        self.assertTrue("Drone 'default': the x coordinate 10 will go beyond its upper limit 0"
+                        in str(context.exception))
 
         with self.assertRaises(SafetyCheckError) as context:
-            safety_config.check_state(State(y_meters=10))
-        self.assertTrue("The y coordinate 10 will go beyond its upper limit 0" in str(context.exception))
+            safety_config.check_state('default', State(y_meters=10))
+        self.assertTrue("Drone 'default': the y coordinate 10 will go beyond its upper limit 0"
+                        in str(context.exception))
 
         with self.assertRaises(SafetyCheckError) as context:
-            safety_config.check_state(State(z_meters=10))
-        self.assertTrue("The z coordinate 10 will go beyond its upper limit 0" in str(context.exception))
+            safety_config.check_state('default', State(z_meters=10))
+        self.assertTrue("Drone 'default': the z coordinate 10 will go beyond its upper limit 0"
+                        in str(context.exception))
 
         with self.assertRaises(SafetyCheckError) as context:
-            safety_config.check_state(State(x_meters=-10))
-        self.assertTrue("The x coordinate -10 will go beyond its lower limit 0" in str(context.exception))
+            safety_config.check_state('default', State(x_meters=-10))
+        self.assertTrue("Drone 'default': the x coordinate -10 will go beyond its lower limit 0"
+                        in str(context.exception))
 
         with self.assertRaises(SafetyCheckError) as context:
-            safety_config.check_state(State(y_meters=-10))
-        self.assertTrue("The y coordinate -10 will go beyond its lower limit 0" in str(context.exception))
+            safety_config.check_state('default', State(y_meters=-10))
+        self.assertTrue("Drone 'default': the y coordinate -10 will go beyond its lower limit 0"
+                        in str(context.exception))
 
         with self.assertRaises(SafetyCheckError) as context:
-            safety_config.check_state(State(z_meters=-10))
-        self.assertTrue("The z coordinate -10 will go beyond its lower limit 0" in str(context.exception))
+            safety_config.check_state('default', State(z_meters=-10))
+        self.assertTrue("Drone 'default': the z coordinate -10 will go beyond its lower limit 0"
+                        in str(context.exception))
 
         with self.assertRaises(SafetyCheckError) as context:
-            safety_config.check_state(State(time_used_seconds=10))
-        self.assertTrue("The time used 10 seconds will go beyond the time limit 0 seconds" in str(context.exception))
+            safety_config.check_state('default', State(time_used_seconds=10))
+        self.assertTrue("Drone 'default': the time used 10 seconds will go beyond the time limit 0 seconds"
+                        in str(context.exception))
 
     def test_check_state_if_no_limit_should_not_give_error(self):
         safety_config = SafetyConfig()
         for number in [1e-5, 1e-3, 1e0, 1e3, 1e5, 1e10, float('inf')]:
-            safety_config.check_state(State(x_meters=number))
-            safety_config.check_state(State(y_meters=number))
-            safety_config.check_state(State(z_meters=number))
-            safety_config.check_state(State(x_meters=-number))
-            safety_config.check_state(State(y_meters=-number))
-            safety_config.check_state(State(z_meters=-number))
-            safety_config.check_state(State(time_used_seconds=number))
+            safety_config.check_state('default', State(x_meters=number))
+            safety_config.check_state('default', State(y_meters=number))
+            safety_config.check_state('default', State(z_meters=number))
+            safety_config.check_state('default', State(x_meters=-number))
+            safety_config.check_state('default', State(y_meters=-number))
+            safety_config.check_state('default', State(z_meters=-number))
+            safety_config.check_state('default', State(time_used_seconds=number))

@@ -115,7 +115,7 @@ class RepeatDroneNameException(Exception):
 class ParallelDroneCommands(AbstractDroneCommand):
     def __init__(self, branches: List[List[AbstractDroneCommand]] = None):
         self._branches = []
-        self._drones_involved = set()
+        self._drones_involved_each_branch = []
         if branches is not None:
             for branch in branches:
                 self.add(branch)
@@ -124,17 +124,21 @@ class ParallelDroneCommands(AbstractDroneCommand):
     def branches(self) -> List[List[AbstractDroneCommand]]:
         return copy.deepcopy(self._branches)
 
+    @property
+    def drones_involved_each_branch(self) -> List[Set[str]]:
+        return copy.deepcopy(self._drones_involved_each_branch)
+
     def get_drones_involved(self) -> Set[str]:
-        return copy.deepcopy(self._drones_involved)
+        return set.union(set(), *self._drones_involved_each_branch)
 
     def add(self, drone_commands: List[AbstractDroneCommand]):
         drones_to_be_involved = set.union(set(),
                                           *[drone_command.get_drones_involved() for drone_command in drone_commands])
-        repeated_names = self._drones_involved.intersection(drones_to_be_involved)
+        repeated_names = self.get_drones_involved().intersection(drones_to_be_involved)
         if len(repeated_names) > 0:
             raise RepeatDroneNameException(repeated_names)
         self._branches.append(drone_commands)
-        self._drones_involved = self._drones_involved.union(drones_to_be_involved)
+        self._drones_involved_each_branch.append(drones_to_be_involved)
 
     def __str__(self):
         result = "ParallelDroneCommands: { "
