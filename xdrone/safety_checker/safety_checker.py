@@ -11,10 +11,11 @@ class SafetyChecker:
     def __init__(self, safety_config: SafetyConfig):
         self.safety_config = safety_config
 
-    def check(self, drone_commands: List[AbstractDroneCommand], state_updaters: Dict[str, StateUpdater]):
-        drone_state_map = {name: state_updater.get_init_state() for name, state_updater in state_updaters.items()}
-        drones_involved = set(state_updaters.keys())
-        self._update_states_and_check_drone_commands(drone_commands, state_updaters, drone_state_map, drones_involved)
+    def check(self, drone_commands: List[AbstractDroneCommand], state_updater_map: Dict[str, StateUpdater]):
+        drone_state_map = {name: state_updater.get_init_state() for name, state_updater in state_updater_map.items()}
+        drones_involved = set(state_updater_map.keys())
+        self._update_states_and_check_drone_commands(drone_commands, state_updater_map, drone_state_map,
+                                                     drones_involved)
         for name, state in drone_state_map.items():
             if state.has_taken_off:
                 raise SafetyCheckError("Drone '{}' did not land in the end".format(name))

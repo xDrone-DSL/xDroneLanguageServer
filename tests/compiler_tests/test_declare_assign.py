@@ -1,10 +1,10 @@
 import unittest
 
 from xdrone import generate_commands
-from xdrone.shared.compile_error import CompileError
 from xdrone.compiler.compiler_utils.expressions import Expression
 from xdrone.compiler.compiler_utils.symbol_table import SymbolTable
 from xdrone.compiler.compiler_utils.type import Type
+from xdrone.shared.compile_error import CompileError
 
 
 class DeclareTest(unittest.TestCase):

@@ -14,7 +14,7 @@ class MultipleDroneMovementTest(unittest.TestCase):
         state_updaters = {"the_one": StateUpdater(DefaultDroneConfig())}
         actual = generate_commands("""
             main() { takeoff(); land(); }
-        """, state_updaters=state_updaters)
+        """, state_updater_map=state_updaters)
         expected = [SingleDroneCommand("the_one", Command.takeoff()),
                     SingleDroneCommand("the_one", Command.land())]
         self.assertEqual(expected, actual)
@@ -24,7 +24,7 @@ class MultipleDroneMovementTest(unittest.TestCase):
         with self.assertRaises(CompileError) as context:
             generate_commands("""
                 main() { takeoff(); land(); }
-            """, state_updaters=state_updaters)
+            """, state_updater_map=state_updaters)
         self.assertTrue("Drone name should be specified if there are multiple drones in config"
                         in str(context.exception))
 
@@ -33,7 +33,7 @@ class MultipleDroneMovementTest(unittest.TestCase):
         with self.assertRaises(CompileError) as context:
             generate_commands("""
                 main() { drone2.takeoff(); drone2.land(); }
-            """, state_updaters=state_updaters)
+            """, state_updater_map=state_updaters)
         self.assertTrue("Drone drone2 has not been defined in config"
                         in str(context.exception))
 
@@ -56,7 +56,7 @@ class ParallelTest(unittest.TestCase):
                 {drone2.land();} || {drone3.land();};
               };
             }
-        """, state_updaters=state_updaters)
+        """, state_updater_map=state_updaters)
         expected = [ParallelDroneCommands([[SingleDroneCommand("drone1", Command.takeoff())],
                                            [SingleDroneCommand("drone2", Command.takeoff())],
                                            [SingleDroneCommand("drone3", Command.takeoff())]]),
@@ -88,7 +88,7 @@ class ParallelTest(unittest.TestCase):
                 main() { 
                   {foo();} || {bar();} || {drone3.takeoff(); drone3.land();}; 
                 }
-            """, state_updaters=state_updaters)
+            """, state_updater_map=state_updaters)
         self.assertTrue("Parallel branches should have exclusive drone names, " +
                         "but {'drone2'} appeared in more than one branches"
                         in str(context.exception))
@@ -101,7 +101,7 @@ class ParallelTest(unittest.TestCase):
             main() { 
               {return; drone1.takeoff();} || {drone2.takeoff(); drone2.land();}; 
             }
-        """, state_updaters=state_updaters)
+        """, state_updater_map=state_updaters)
         expected = [ParallelDroneCommands([[],
                                            [SingleDroneCommand("drone2", Command.takeoff()),
                                             SingleDroneCommand("drone2", Command.land())]])]
@@ -116,7 +116,7 @@ class ParallelTest(unittest.TestCase):
                 main() { 
                   {return 1; drone1.takeoff();} || {drone2.takeoff(); drone2.land();}; 
                 }
-            """, state_updaters=state_updaters)
+            """, state_updater_map=state_updaters)
         self.assertTrue("Parallel branch should not return anything, but {} is returned"
                         .format(Expression(Type.int(), 1))
                         in str(context.exception))

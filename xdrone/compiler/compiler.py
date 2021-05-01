@@ -11,7 +11,6 @@ from xdrone.compiler.compiler_utils.type import Type, ListType, EmptyList
 from xdrone.shared.command import Command, SingleDroneCommand, ParallelDroneCommands, AbstractDroneCommand, \
     RepeatDroneNameException
 from xdrone.shared.compile_error import CompileError
-from xdrone.shared.state import State
 
 
 class Compiler(xDroneParserVisitor):

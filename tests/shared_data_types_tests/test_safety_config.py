@@ -1,8 +1,8 @@
 import unittest
 
+from xdrone.shared.safety_check_error import SafetyCheckError
 from xdrone.shared.safety_config import SafetyConfig
 from xdrone.shared.state import State
-from xdrone.shared.safety_check_error import SafetyCheckError
 
 
 class SafetyConfigTest(unittest.TestCase):

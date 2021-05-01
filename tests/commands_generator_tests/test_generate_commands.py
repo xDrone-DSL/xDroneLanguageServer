@@ -43,9 +43,9 @@ class GenerateCommandsTest(unittest.TestCase):
         commands = "main() {takeoff(); land();}"
         with self.assertRaises(SafetyCheckError) as context:
             generate_commands(commands,
-                              state_updaters={"default": StateUpdater(DroneConfig(init_position=(0, 0, 0),
-                                                                                  speed_mps=1, rotate_speed_dps=90,
-                                                                                  takeoff_height_meters=10))},
+                              state_updater_map={"default": StateUpdater(DroneConfig(init_position=(0, 0, 0),
+                                                                                     speed_mps=1, rotate_speed_dps=90,
+                                                                                     takeoff_height_meters=10))},
                               safety_checker=SafetyChecker(SafetyConfig(max_seconds=10, max_z_meters=1)))
         self.assertTrue("Drone 'default': the z coordinate 10 will go beyond its upper limit 1"
                         in str(context.exception))

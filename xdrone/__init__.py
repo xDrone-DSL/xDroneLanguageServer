@@ -16,23 +16,23 @@ from xdrone.shared.safety_config import SafetyConfig
 from xdrone.state_updaters.state_updater import StateUpdater
 
 
-def generate_commands(program, state_updaters: Dict[str, StateUpdater] = None, safety_checker: SafetyChecker = None,
+def generate_commands(program, state_updater_map: Dict[str, StateUpdater] = None, safety_checker: SafetyChecker = None,
                       symbol_table: SymbolTable = None, function_table: FunctionTable = None):
-    if state_updaters is None:
-        state_updaters = {"default": StateUpdater(DefaultDroneConfig())}
+    if state_updater_map is None:
+        state_updater_map = {"default": StateUpdater(DefaultDroneConfig())}
     if safety_checker is None:
         safety_checker = SafetyChecker(SafetyConfig.no_limit())
     if symbol_table is None:
         symbol_table = SymbolTable()
     if function_table is None:
         function_table = FunctionTable()
-    drones = set(state_updaters.keys())
+    drones = set(state_updater_map.keys())
 
     tree = _parse_program(program)
 
     drone_commands = Compiler(drones, symbol_table, function_table).visit(tree)
 
-    safety_checker.check(drone_commands, state_updaters)
+    safety_checker.check(drone_commands, state_updater_map)
 
     return drone_commands
 
@@ -55,6 +55,6 @@ def _parse_program(program):
 
 def generate_commands_with_config(program, config_json):
     drone_config_map, safety_config = ConfigParser.parse(config_json)
-    state_updaters = {name: StateUpdater(config) for name, config in drone_config_map}
+    state_updater_map = {name: StateUpdater(config) for name, config in drone_config_map}
     safety_checker = SafetyChecker(safety_config)
-    return generate_commands(program, state_updaters, safety_checker)
+    return generate_commands(program, state_updater_map, safety_checker)
