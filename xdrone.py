@@ -30,11 +30,11 @@ def xdrone(function, code, config, timeout, port):
                       "Your can change the timeout time by adding the '--timeout' tag.")
     if queue.empty():
         return
-    commands = queue.get()
+    drone_commands, drone_config_map = queue.get()
     if function == "simulate":
-        _simulate(commands, port)
+        _simulate(drone_commands, drone_config_map, port)
     if function == "fly":
-        _fly(commands)
+        _fly(drone_commands)
 
 
 def _run_with_timeout(target, args, timeout, timeout_msg="Timeout"):
@@ -50,21 +50,21 @@ def _run_with_timeout(target, args, timeout, timeout_msg="Timeout"):
 def _validate(program, config, queue):
     print("Validating your program...")
     try:
-        command = generate_commands_with_config(program, config)
+        drone_commands, drone_config_map, _ = generate_commands_with_config(program, config)
         print("Your program is valid.")
-        queue.put(command)
+        queue.put((drone_commands, drone_config_map))
     except Exception as e:
         print("Failed to validate your program, error: " + str(e))
 
 
-def _simulate(commands, port):
+def _simulate(drone_commands, drone_config_map, port):
     print("Start simulation...")
     if not _is_port_in_use(port):
         print("Aborted. Please make sure xDrone Simulator is running on localhost port {}. ".format(port) +
               "Your can change the port by adding the '--port' tag.")
         return
-    simulation_json = SimulationConverter().convert_commands(commands)
-    url = "http://localhost:{}/?commands={}".format(port, urllib.parse.quote(simulation_json))
+    simulation_json = SimulationConverter().convert(drone_commands, drone_config_map)
+    url = "http://localhost:{}/?data={}".format(port, urllib.parse.quote(simulation_json))
     print(url)
     webbrowser.open(url)
 
@@ -75,9 +75,10 @@ def _is_port_in_use(port):
         return s.connect_ex(('localhost', port)) == 0
 
 
-def _fly(commands):
+def _fly(drone_commands):
     print("Start to fly your drone...")
-    DJITelloExecutor().execute_commands(commands)
+    # TODO the following is for one drone only
+    DJITelloExecutor().execute_commands(drone_commands)
 
 
 if __name__ == '__main__':

@@ -55,6 +55,6 @@ def _parse_program(program):
 
 def generate_commands_with_config(program, config_json):
     drone_config_map, safety_config = ConfigParser.parse(config_json)
-    state_updater_map = {name: StateUpdater(config) for name, config in drone_config_map}
+    state_updater_map = {name: StateUpdater(config) for name, config in drone_config_map.items()}
     safety_checker = SafetyChecker(safety_config)
-    return generate_commands(program, state_updater_map, safety_checker)
+    return generate_commands(program, state_updater_map, safety_checker), drone_config_map, safety_config
