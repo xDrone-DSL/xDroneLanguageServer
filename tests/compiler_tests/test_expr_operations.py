@@ -47,8 +47,8 @@ class BooleanOperationTest(unittest.TestCase):
             self.assertEqual(expected, actual)
 
     def test_bool_or_with_wrong_type_should_give_error(self):
-        types = [Type.int(), Type.decimal(), Type.string(), Type.vector(), Type.list_of(Type.int()),
-                 Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
+        types = [Type.int(), Type.decimal(), Type.string(), Type.vector(), Type.drone(),
+                 Type.list_of(Type.int()), Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
         for type in types:
             with self.assertRaises(CompileError) as context:
                 generate_commands("""
@@ -85,8 +85,8 @@ class BooleanOperationTest(unittest.TestCase):
             self.assertEqual(expected, actual)
 
     def test_bool_and_with_wrong_type_should_give_error(self):
-        types = [Type.int(), Type.decimal(), Type.string(), Type.vector(), Type.list_of(Type.int()),
-                 Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
+        types = [Type.int(), Type.decimal(), Type.string(), Type.vector(), Type.drone(),
+                 Type.list_of(Type.int()), Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
         for type in types:
             with self.assertRaises(CompileError) as context:
                 generate_commands("""
@@ -145,8 +145,8 @@ class BooleanOperationTest(unittest.TestCase):
             self.assertEqual(expected, actual)
 
     def test_bool_not_with_wrong_type_should_give_error(self):
-        types = [Type.int(), Type.decimal(), Type.string(), Type.vector(), Type.list_of(Type.int()),
-                 Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
+        types = [Type.int(), Type.decimal(), Type.string(), Type.vector(), Type.drone(),
+                 Type.list_of(Type.int()), Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
         for type in types:
             with self.assertRaises(CompileError) as context:
                 generate_commands("""
@@ -185,8 +185,8 @@ class ComparisonOperationTest(unittest.TestCase):
         self.assertEqual(expected, actual)
 
     def test_greater_with_wrong_type_should_give_error(self):
-        types = [Type.boolean(), Type.string(), Type.vector(), Type.list_of(Type.int()),
-                 Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
+        types = [Type.boolean(), Type.string(), Type.vector(), Type.drone(),
+                 Type.list_of(Type.int()), Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
         for type in types:
             with self.assertRaises(CompileError) as context:
                 generate_commands("""
@@ -234,8 +234,8 @@ class ComparisonOperationTest(unittest.TestCase):
         self.assertEqual(expected, actual)
 
     def test_greater_equal_with_wrong_type_should_give_error(self):
-        types = [Type.boolean(), Type.string(), Type.vector(), Type.list_of(Type.int()),
-                 Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
+        types = [Type.boolean(), Type.string(), Type.vector(), Type.drone(),
+                 Type.list_of(Type.int()), Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
         for type in types:
             with self.assertRaises(CompileError) as context:
                 generate_commands("""
@@ -283,8 +283,8 @@ class ComparisonOperationTest(unittest.TestCase):
         self.assertEqual(expected, actual)
 
     def test_less_with_wrong_type_should_give_error(self):
-        types = [Type.boolean(), Type.string(), Type.vector(), Type.list_of(Type.int()),
-                 Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
+        types = [Type.boolean(), Type.string(), Type.vector(), Type.drone(),
+                 Type.list_of(Type.int()), Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
         for type in types:
             with self.assertRaises(CompileError) as context:
                 generate_commands("""
@@ -332,8 +332,8 @@ class ComparisonOperationTest(unittest.TestCase):
         self.assertEqual(expected, actual)
 
     def test_less_equal_with_wrong_type_should_give_error(self):
-        types = [Type.boolean(), Type.string(), Type.vector(), Type.list_of(Type.int()),
-                 Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
+        types = [Type.boolean(), Type.string(), Type.vector(), Type.drone(),
+                 Type.list_of(Type.int()), Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
         for type in types:
             with self.assertRaises(CompileError) as context:
                 generate_commands("""
@@ -358,8 +358,8 @@ class ComparisonOperationTest(unittest.TestCase):
                             in str(context.exception))
 
     def test_equal_should_return_correct_value(self):
-        types = [Type.int(), Type.decimal(), Type.boolean(), Type.string(), Type.vector(), Type.list_of(Type.int()),
-                 Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
+        types = [Type.int(), Type.decimal(), Type.boolean(), Type.string(), Type.vector(), Type.drone(),
+                 Type.list_of(Type.int()), Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
         for type in types:
             st = SymbolTable()
             generate_commands("""
@@ -396,8 +396,8 @@ class ComparisonOperationTest(unittest.TestCase):
         self.assertEqual(expected, actual)
 
     def test_equal_diff_types_should_give_error(self):
-        types = [Type.int(), Type.decimal(), Type.boolean(), Type.string(), Type.vector(), Type.list_of(Type.int()),
-                 Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
+        types = [Type.int(), Type.decimal(), Type.boolean(), Type.string(), Type.vector(), Type.drone(),
+                 Type.list_of(Type.int()), Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
         for t1 in types:
             for t2 in types:
                 if t1 == t2:
@@ -416,8 +416,8 @@ class ComparisonOperationTest(unittest.TestCase):
                                 in str(context.exception))
 
     def test_not_equal_should_return_correct_value(self):
-        types = [Type.int(), Type.decimal(), Type.boolean(), Type.string(), Type.vector(), Type.list_of(Type.int()),
-                 Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
+        types = [Type.int(), Type.decimal(), Type.boolean(), Type.string(), Type.vector(), Type.drone(),
+                 Type.list_of(Type.int()), Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
         for type in types:
             st = SymbolTable()
             generate_commands("""
@@ -454,8 +454,8 @@ class ComparisonOperationTest(unittest.TestCase):
         self.assertEqual(expected, actual)
 
     def test_not_equal_diff_types_should_give_error(self):
-        types = [Type.int(), Type.decimal(), Type.boolean(), Type.string(), Type.vector(), Type.list_of(Type.int()),
-                 Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
+        types = [Type.int(), Type.decimal(), Type.boolean(), Type.string(), Type.vector(), Type.drone(),
+                 Type.list_of(Type.int()), Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
         for t1 in types:
             for t2 in types:
                 if t1 == t2:
@@ -495,8 +495,8 @@ class ArithmeticOperationTest(unittest.TestCase):
         self.assertEqual(expected, actual)
 
     def test_plus_with_wrong_type_should_give_error(self):
-        types = [Type.int(), Type.decimal(), Type.string(), Type.boolean(), Type.vector(), Type.list_of(Type.int()),
-                 Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
+        types = [Type.int(), Type.decimal(), Type.string(), Type.boolean(), Type.vector(), Type.drone(),
+                 Type.list_of(Type.int()), Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
         allow_pairs = [(Type.int(), Type.int()), (Type.decimal(), Type.decimal()), (Type.vector(), Type.vector()),
                        (Type.int(), Type.decimal()), (Type.decimal(), Type.int())]
         for t1 in types:
@@ -536,8 +536,8 @@ class ArithmeticOperationTest(unittest.TestCase):
         self.assertEqual(expected, actual)
 
     def test_minus_with_wrong_type_should_give_error(self):
-        types = [Type.int(), Type.decimal(), Type.string(), Type.boolean(), Type.vector(), Type.list_of(Type.int()),
-                 Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
+        types = [Type.int(), Type.decimal(), Type.string(), Type.boolean(), Type.vector(), Type.drone(),
+                 Type.list_of(Type.int()), Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
         allow_pairs = [(Type.int(), Type.int()), (Type.decimal(), Type.decimal()), (Type.vector(), Type.vector()),
                        (Type.int(), Type.decimal()), (Type.decimal(), Type.int())]
         for t1 in types:
@@ -583,8 +583,8 @@ class ArithmeticOperationTest(unittest.TestCase):
         self.assertEqual(expected, actual)
 
     def test_multi_with_wrong_type_should_give_error(self):
-        types = [Type.int(), Type.decimal(), Type.string(), Type.boolean(), Type.vector(), Type.list_of(Type.int()),
-                 Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
+        types = [Type.int(), Type.decimal(), Type.string(), Type.boolean(), Type.vector(), Type.drone(),
+                 Type.list_of(Type.int()), Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
         allow_pairs = [(Type.int(), Type.int()), (Type.decimal(), Type.decimal()),
                        (Type.int(), Type.decimal()), (Type.decimal(), Type.int()),
                        (Type.vector(), Type.int()), (Type.int(), Type.vector()),
@@ -636,8 +636,8 @@ class ArithmeticOperationTest(unittest.TestCase):
         self.assertEqual(expected, actual)
 
     def test_divide_with_wrong_type_should_give_error(self):
-        types = [Type.int(), Type.decimal(), Type.string(), Type.boolean(), Type.vector(), Type.list_of(Type.int()),
-                 Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
+        types = [Type.int(), Type.decimal(), Type.string(), Type.boolean(), Type.vector(), Type.drone(),
+                 Type.list_of(Type.int()), Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
         allow_pairs = [(Type.int(), Type.int()), (Type.decimal(), Type.decimal()),
                        (Type.int(), Type.decimal()), (Type.decimal(), Type.int()),
                        (Type.vector(), Type.int()),
@@ -692,8 +692,8 @@ class ArithmeticOperationTest(unittest.TestCase):
         self.assertEqual(expected, actual)
 
     def test_posit_with_wrong_type_should_give_error(self):
-        types = [Type.boolean(), Type.string(), Type.list_of(Type.int()),
-                 Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
+        types = [Type.boolean(), Type.string(), Type.drone(),
+                 Type.list_of(Type.int()), Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
         for type in types:
             with self.assertRaises(CompileError) as context:
                 generate_commands("""
@@ -722,8 +722,8 @@ class ArithmeticOperationTest(unittest.TestCase):
         self.assertEqual(expected, actual)
 
     def test_negate_with_wrong_type_should_give_error(self):
-        types = [Type.boolean(), Type.string(), Type.list_of(Type.int()),
-                 Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
+        types = [Type.boolean(), Type.string(), Type.drone(),
+                 Type.list_of(Type.int()), Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
         for type in types:
             with self.assertRaises(CompileError) as context:
                 generate_commands("""
@@ -760,7 +760,7 @@ class OtherOperationTest(unittest.TestCase):
         self.assertEqual(expected, actual)
 
     def test_size_of_wrong_type_should_give_error(self):
-        types = [Type.int(), Type.decimal(), Type.boolean(), Type.string(), Type.vector()]
+        types = [Type.int(), Type.decimal(), Type.boolean(), Type.string(), Type.vector(), Type.drone()]
         for type in types:
             with self.assertRaises(CompileError) as context:
                 generate_commands("""
@@ -793,8 +793,8 @@ class OtherOperationTest(unittest.TestCase):
         self.assertEqual(expected, actual)
 
     def test_concat_of_wrong_types_should_give_error(self):
-        types = [Type.int(), Type.decimal(), Type.boolean(), Type.vector(), Type.list_of(Type.int()),
-                 Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
+        types = [Type.int(), Type.decimal(), Type.boolean(), Type.vector(), Type.drone(),
+                 Type.list_of(Type.int()), Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
         for type in types:
             with self.assertRaises(CompileError) as context:
                 generate_commands("""

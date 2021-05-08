@@ -1,10 +1,12 @@
 import unittest
 
 from xdrone import generate_commands
+from xdrone.compiler.compiler_utils.drones import NullDrone, Drone
 from xdrone.compiler.compiler_utils.expressions import Expression
 from xdrone.compiler.compiler_utils.symbol_table import SymbolTable
 from xdrone.compiler.compiler_utils.type import Type
 from xdrone.shared.compile_error import CompileError
+from xdrone.shared.drone_config import DefaultDroneConfig
 
 
 class DeclareTest(unittest.TestCase):
@@ -51,6 +53,15 @@ class DeclareTest(unittest.TestCase):
             """, symbol_table=actual)
         expected = SymbolTable()
         expected.store("a", Expression(Type.vector(), [0, 0, 0], ident="a"))
+        self.assertEqual(expected, actual)
+
+    def test_declare_drone_should_change_symbol_table(self):
+        actual = SymbolTable()
+        generate_commands("""
+            main () { drone a; }
+            """, symbol_table=actual)
+        expected = SymbolTable()
+        expected.store("a", Expression(Type.drone(), NullDrone(), ident="a"))
         self.assertEqual(expected, actual)
 
     def test_declare_list_should_change_symbol_table(self):
@@ -165,6 +176,18 @@ class AssignIdentTest(unittest.TestCase):
         expected.store("a", Expression(Type.vector(), [1, -1, 1], ident="a"))
         self.assertEqual(expected, actual)
 
+    def test_assign_ident_drone_should_update_symbol_table(self):
+        actual = SymbolTable()
+        generate_commands("""
+            main () {
+             drone a;
+             a <- DRONE1;
+            }
+            """, drone_config_map={"DRONE1": DefaultDroneConfig()}, symbol_table=actual)
+        expected = SymbolTable()
+        expected.store("a", Expression(Type.drone(), Drone("DRONE1", DefaultDroneConfig()), ident="a"))
+        self.assertEqual(expected, actual)
+
     def test_assign_ident_list_should_update_symbol_table(self):
         actual = SymbolTable()
         generate_commands("""
@@ -190,7 +213,7 @@ class AssignIdentTest(unittest.TestCase):
         self.assertEqual(expected, actual)
 
     def test_assign_ident_empty_list_should_update_symbol_table(self):
-        types = [Type.int(), Type.decimal(), Type.string(), Type.boolean(), Type.vector(),
+        types = [Type.int(), Type.decimal(), Type.string(), Type.boolean(), Type.vector(), Type.drone(),
                  Type.list_of(Type.int()), Type.list_of(Type.list_of(Type.int()))]
         for type in types:
             actual = SymbolTable()
@@ -215,7 +238,8 @@ class AssignIdentTest(unittest.TestCase):
         self.assertTrue("Identifier a has not been declared" in str(context.exception))
 
     def test_declare_and_then_assign_with_different_type_should_give_error(self):
-        types = ["int", "decimal", "string", "boolean", "vector", "list[int]", "list[decimal]", "list[list[int]]"]
+        types = ["int", "decimal", "string", "boolean", "vector", "drone", "list[int]", "list[decimal]",
+                 "list[list[int]]"]
         for t1 in types:
             for t2 in types:
                 if t1 == t2:
@@ -233,7 +257,9 @@ class AssignIdentTest(unittest.TestCase):
                                 .format(t1, t2) in str(context.exception))
 
     def test_declare_and_then_assign_with_same_type_should_success(self):
-        for type in ["int", "decimal", "string", "boolean", "vector", "list[int]", "list[decimal]", "list[list[int]]"]:
+        types = ["int", "decimal", "string", "boolean", "vector", "drone", "list[int]", "list[decimal]",
+                 "list[list[int]]"]
+        for type in types:
             generate_commands("""
                 main () {{
                  {} a;
@@ -279,8 +305,8 @@ class AssignVectorElemTest(unittest.TestCase):
         self.assertTrue("Identifier a has not been declared" in str(context.exception))
 
     def test_declare_and_then_assign_vector_elem_with_different_type_should_give_error(self):
-        for type in [Type.int(), Type.string(), Type.boolean(), Type.vector(), Type.list_of(Type.int()),
-                     Type.list_of(Type.list_of(Type.int()))]:
+        for type in [Type.int(), Type.string(), Type.boolean(), Type.vector(), Type.drone(),
+                     Type.list_of(Type.int()), Type.list_of(Type.list_of(Type.int()))]:
             for index in ["x", "y", "z"]:
                 with self.assertRaises(CompileError) as context:
                     generate_commands("""
@@ -411,7 +437,7 @@ class AssignListElemTest(unittest.TestCase):
         self.assertTrue("Identifier a has not been declared" in str(context.exception))
 
     def test_declare_and_assign_list_elem_with_different_type_should_give_error(self):
-        types = [Type.int(), Type.decimal(), Type.string(), Type.boolean(), Type.vector(),
+        types = [Type.int(), Type.decimal(), Type.string(), Type.boolean(), Type.vector(), Type.drone(),
                  Type.list_of(Type.int()), Type.list_of(Type.list_of(Type.int()))]
         for t1 in types:
             for t2 in types:
@@ -429,7 +455,7 @@ class AssignListElemTest(unittest.TestCase):
                                 .format(t2, t1) in str(context.exception))
 
     def test_assign_list_elem_with_different_type_should_give_error(self):
-        types = [Type.int(), Type.decimal(), Type.string(), Type.boolean(), Type.vector(),
+        types = [Type.int(), Type.decimal(), Type.string(), Type.boolean(), Type.vector(), Type.drone(),
                  Type.list_of(Type.int()), Type.list_of(Type.list_of(Type.int()))]
         for t1 in types:
             for t2 in types:
@@ -497,6 +523,15 @@ class CombinedDeclareAssignTest(unittest.TestCase):
         expected.store("a", Expression(Type.vector(), [1, 2, -3], ident="a"))
         self.assertEqual(expected, actual)
 
+    def test_declare_and_assign_drone_should_change_symbol_table(self):
+        actual = SymbolTable()
+        generate_commands("""
+            main () { drone a <- DRONE1; }
+            """, drone_config_map={"DRONE1": DefaultDroneConfig()}, symbol_table=actual)
+        expected = SymbolTable()
+        expected.store("a", Expression(Type.drone(), Drone("DRONE1", DefaultDroneConfig()), ident="a"))
+        self.assertEqual(expected, actual)
+
     def test_declare_and_assign_list_should_change_symbol_table(self):
         actual = SymbolTable()
         generate_commands("""
@@ -516,7 +551,7 @@ class CombinedDeclareAssignTest(unittest.TestCase):
         self.assertEqual(expected, actual)
 
     def test_declare_and_assign_ident_empty_list_should_update_symbol_table(self):
-        types = [Type.int(), Type.decimal(), Type.string(), Type.boolean(), Type.vector(),
+        types = [Type.int(), Type.decimal(), Type.string(), Type.boolean(), Type.vector(), Type.drone(),
                  Type.list_of(Type.int()), Type.list_of(Type.list_of(Type.int()))]
         for type in types:
             actual = SymbolTable()
@@ -541,8 +576,8 @@ class CombinedDeclareAssignTest(unittest.TestCase):
         self.assertTrue("Identifier a already declared" in str(context.exception))
 
     def test_declare_and_assign_with_different_type_should_give_error(self):
-        types = [Type.int(), Type.decimal(), Type.string(), Type.boolean(), Type.vector(), Type.list_of(Type.int()),
-                 Type.list_of(Type.list_of(Type.int()))]
+        types = [Type.int(), Type.decimal(), Type.string(), Type.boolean(), Type.vector(), Type.drone(),
+                 Type.list_of(Type.int()), Type.list_of(Type.list_of(Type.int()))]
         for t1 in types:
             for t2 in types:
                 if t1 == t2:

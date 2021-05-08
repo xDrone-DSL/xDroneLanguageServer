@@ -170,13 +170,13 @@ class TestParallelCommands(unittest.TestCase):
     def test_get_drones_involved(self):
         parallel_commands = ParallelDroneCommands()
         self.assertEqual(set(), parallel_commands.get_drones_involved())
-        parallel_commands = ParallelDroneCommands([[SingleDroneCommand("drone1", Command.takeoff())],
-                                                   [SingleDroneCommand("drone2", Command.takeoff())],
+        parallel_commands = ParallelDroneCommands([[SingleDroneCommand("DRONE1", Command.takeoff())],
+                                                   [SingleDroneCommand("DRONE2", Command.takeoff())],
                                                    [ParallelDroneCommands([
-                                                       [SingleDroneCommand("drone3", Command.takeoff())],
-                                                       [SingleDroneCommand("drone4", Command.takeoff())]
+                                                       [SingleDroneCommand("DRONE3", Command.takeoff())],
+                                                       [SingleDroneCommand("DRONE4", Command.takeoff())]
                                                    ])]])
-        self.assertEqual({"drone1", "drone2", "drone3", "drone4"}, parallel_commands.get_drones_involved())
+        self.assertEqual({"DRONE1", "DRONE2", "DRONE3", "DRONE4"}, parallel_commands.get_drones_involved())
 
     def test_add(self):
         parallel_commands = ParallelDroneCommands()
@@ -189,18 +189,18 @@ class TestParallelCommands(unittest.TestCase):
 
     def test_add_already_involved_drones_should_give_error(self):
         parallel_commands = ParallelDroneCommands()
-        parallel_commands.add([SingleDroneCommand("drone1", Command.takeoff())])
+        parallel_commands.add([SingleDroneCommand("DRONE1", Command.takeoff())])
         with self.assertRaises(RepeatDroneNameException) as context:
-            parallel_commands.add([SingleDroneCommand("drone1", Command.takeoff())])
-        self.assertTrue({"drone1"}, context.exception.repeated_names)
+            parallel_commands.add([SingleDroneCommand("DRONE1", Command.takeoff())])
+        self.assertTrue({"DRONE1"}, context.exception.repeated_names)
 
     def test_init_with_repeated_drones_should_give_error(self):
         with self.assertRaises(RepeatDroneNameException) as context:
             ParallelDroneCommands([
-                [SingleDroneCommand("drone1", Command.takeoff())],
-                [SingleDroneCommand("drone1", Command.takeoff())]
+                [SingleDroneCommand("DRONE1", Command.takeoff())],
+                [SingleDroneCommand("DRONE1", Command.takeoff())]
             ])
-        self.assertTrue({"drone1"}, context.exception.repeated_names)
+        self.assertTrue({"DRONE1"}, context.exception.repeated_names)
 
     def test_str(self):
         parallel_commands = ParallelDroneCommands()

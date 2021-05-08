@@ -45,7 +45,7 @@ class ListTest(unittest.TestCase):
         self.assertEqual(expected, actual)
 
     def test_list_elem_assign_with_wrong_ident_should_give_error(self):
-        types = [Type.int(), Type.decimal(), Type.string(), Type.boolean(), Type.vector()]
+        types = [Type.int(), Type.decimal(), Type.string(), Type.boolean(), Type.vector(), Type.drone()]
         for type in types:
             with self.assertRaises(CompileError) as context:
                 generate_commands("""
@@ -60,8 +60,8 @@ class ListTest(unittest.TestCase):
                             in str(context.exception))
 
     def test_list_elem_assign_with_wrong_index_should_give_error(self):
-        types = [Type.decimal(), Type.string(), Type.boolean(), Type.vector(), Type.list_of(Type.int()),
-                 Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
+        types = [Type.decimal(), Type.string(), Type.boolean(), Type.vector(), Type.drone(),
+                 Type.list_of(Type.int()), Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
         for type in types:
             with self.assertRaises(CompileError) as context:
                 generate_commands("""
@@ -119,7 +119,7 @@ class ListTest(unittest.TestCase):
         self.assertEqual(expected, actual)
 
     def test_list_elem_expr_with_wrong_ident_should_give_error(self):
-        types = [Type.int(), Type.decimal(), Type.string(), Type.boolean(), Type.vector()]
+        types = [Type.int(), Type.decimal(), Type.string(), Type.boolean(), Type.vector(), Type.drone()]
         for type in types:
             with self.assertRaises(CompileError) as context:
                 generate_commands("""
@@ -134,8 +134,8 @@ class ListTest(unittest.TestCase):
                             in str(context.exception))
 
     def test_list_elem_expr_with_wrong_index_should_give_error(self):
-        types = [Type.decimal(), Type.string(), Type.boolean(), Type.vector(), Type.list_of(Type.int()),
-                 Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
+        types = [Type.decimal(), Type.string(), Type.boolean(), Type.vector(), Type.drone(),
+                 Type.list_of(Type.int()), Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
         for type in types:
             with self.assertRaises(CompileError) as context:
                 generate_commands("""
@@ -249,8 +249,8 @@ class ListInsertTest(unittest.TestCase):
         self.assertEqual(expected, actual)
 
     def test_list_insert_with_wrong_type_index_should_give_error(self):
-        types = [Type.decimal(), Type.string(), Type.boolean(), Type.vector(), Type.list_of(Type.int()),
-                 Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
+        types = [Type.decimal(), Type.string(), Type.boolean(), Type.vector(), Type.drone(),
+                 Type.list_of(Type.int()), Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
         for type in types:
             with self.assertRaises(CompileError) as context:
                 generate_commands("""
@@ -266,7 +266,7 @@ class ListInsertTest(unittest.TestCase):
                             in str(context.exception))
 
     def test_list_insert_to_non_list_should_give_error(self):
-        types = [Type.int(), Type.decimal(), Type.string(), Type.boolean(), Type.vector()]
+        types = [Type.int(), Type.decimal(), Type.string(), Type.boolean(), Type.vector(), Type.drone()]
         for type in types:
             with self.assertRaises(CompileError) as context:
                 generate_commands("""
@@ -281,8 +281,8 @@ class ListInsertTest(unittest.TestCase):
                             in str(context.exception))
 
     def test_list_insert_with_wrong_type_value_should_give_error(self):
-        types = [Type.int(), Type.decimal(), Type.string(), Type.boolean(), Type.vector(), Type.list_of(Type.int()),
-                 Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
+        types = [Type.int(), Type.decimal(), Type.string(), Type.boolean(), Type.vector(), Type.drone(),
+                 Type.list_of(Type.int()), Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
         for t1 in types:
             for t2 in types:
                 if t1 == t2:
@@ -397,8 +397,8 @@ class ListRemoveTest(unittest.TestCase):
                         in str(context.exception))
 
     def test_list_remove_with_wrong_type_index_should_give_error(self):
-        types = [Type.decimal(), Type.string(), Type.boolean(), Type.vector(), Type.list_of(Type.int()),
-                 Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
+        types = [Type.decimal(), Type.string(), Type.boolean(), Type.vector(), Type.drone(),
+                 Type.list_of(Type.int()), Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
         for type in types:
             with self.assertRaises(CompileError) as context:
                 generate_commands("""
@@ -414,7 +414,7 @@ class ListRemoveTest(unittest.TestCase):
                             in str(context.exception))
 
     def test_list_remove_from_non_list_should_give_error(self):
-        types = [Type.int(), Type.decimal(), Type.string(), Type.boolean(), Type.vector()]
+        types = [Type.int(), Type.decimal(), Type.string(), Type.boolean(), Type.vector(), Type.drone()]
         for type in types:
             with self.assertRaises(CompileError) as context:
                 generate_commands("""
@@ -465,8 +465,8 @@ class VectorTest(unittest.TestCase):
         self.assertEqual(expected, actual)
 
     def test_vector_with_wrong_type_should_give_error(self):
-        types = [Type.int(), Type.string(), Type.boolean(), Type.vector(), Type.list_of(Type.int()),
-                 Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
+        types = [Type.int(), Type.string(), Type.boolean(), Type.vector(), Type.drone(),
+                 Type.list_of(Type.int()), Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
         for type in types:
             with self.assertRaises(CompileError) as context:
                 generate_commands("""
@@ -494,8 +494,8 @@ class VectorTest(unittest.TestCase):
         self.assertEqual(expected, actual)
 
     def test_vector_elem_assign_with_wrong_ident_should_give_error(self):
-        types = [Type.int(), Type.decimal(), Type.string(), Type.boolean(), Type.list_of(Type.int()),
-                 Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
+        types = [Type.int(), Type.decimal(), Type.string(), Type.boolean(), Type.drone(),
+                 Type.list_of(Type.int()), Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
         for type in types:
             for index in "xyz":
                 with self.assertRaises(CompileError) as context:
@@ -528,8 +528,8 @@ class VectorTest(unittest.TestCase):
         self.assertEqual(expected, actual)
 
     def test_list_elem_expr_with_wrong_ident_should_give_error(self):
-        types = [Type.int(), Type.decimal(), Type.string(), Type.boolean(), Type.list_of(Type.int()),
-                 Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
+        types = [Type.int(), Type.decimal(), Type.string(), Type.boolean(), Type.drone(),
+                 Type.list_of(Type.int()), Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
         for type in types:
             for index in "xyz":
                 with self.assertRaises(CompileError) as context:

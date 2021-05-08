@@ -12,39 +12,39 @@ class MovementCommandsTest(unittest.TestCase):
         actual = generate_commands("""
             main() { takeoff(); land(); }
         """)
-        expected = [SingleDroneCommand("default", Command.takeoff()),
-                    SingleDroneCommand("default", Command.land())]
+        expected = [SingleDroneCommand("DEFAULT", Command.takeoff()),
+                    SingleDroneCommand("DEFAULT", Command.land())]
         self.assertEqual(expected, actual)
 
     def test_land_should_return_correct_command(self):
         actual = generate_commands("""
             main() { takeoff(); land(); }
         """)
-        expected = [SingleDroneCommand("default", Command.takeoff()),
-                    SingleDroneCommand("default", Command.land())]
+        expected = [SingleDroneCommand("DEFAULT", Command.takeoff()),
+                    SingleDroneCommand("DEFAULT", Command.land())]
         self.assertEqual(expected, actual)
 
     def test_up_with_int_parameter_should_return_correct_command(self):
         actual = generate_commands("""
             main() { takeoff(); up(1); land(); }
         """)
-        expected = [SingleDroneCommand("default", Command.takeoff()),
-                    SingleDroneCommand("default", Command.up(1)),
-                    SingleDroneCommand("default", Command.land())]
+        expected = [SingleDroneCommand("DEFAULT", Command.takeoff()),
+                    SingleDroneCommand("DEFAULT", Command.up(1)),
+                    SingleDroneCommand("DEFAULT", Command.land())]
         self.assertEqual(expected, actual)
 
     def test_up_with_decimal_parameter_should_return_correct_command(self):
         actual = generate_commands("""
             main() { takeoff(); up(1.0); land(); }
         """)
-        expected = [SingleDroneCommand("default", Command.takeoff()),
-                    SingleDroneCommand("default", Command.up(1.0)),
-                    SingleDroneCommand("default", Command.land())]
+        expected = [SingleDroneCommand("DEFAULT", Command.takeoff()),
+                    SingleDroneCommand("DEFAULT", Command.up(1.0)),
+                    SingleDroneCommand("DEFAULT", Command.land())]
         self.assertEqual(expected, actual)
 
     def test_up_with_incorrect_parameter_should_give_error(self):
-        types = [Type.boolean(), Type.string(), Type.vector(), Type.list_of(Type.int()),
-                 Type.list_of(Type.list_of(Type.int()))]
+        types = [Type.boolean(), Type.string(), Type.vector(), Type.drone(),
+                 Type.list_of(Type.int()), Type.list_of(Type.list_of(Type.int()))]
         for type in types:
             with self.assertRaises(CompileError) as context:
                 generate_commands("""
@@ -64,23 +64,23 @@ class MovementCommandsTest(unittest.TestCase):
         actual = generate_commands("""
             main() { takeoff(); down(1); land(); }
         """)
-        expected = [SingleDroneCommand("default", Command.takeoff()),
-                    SingleDroneCommand("default", Command.down(1)),
-                    SingleDroneCommand("default", Command.land())]
+        expected = [SingleDroneCommand("DEFAULT", Command.takeoff()),
+                    SingleDroneCommand("DEFAULT", Command.down(1)),
+                    SingleDroneCommand("DEFAULT", Command.land())]
         self.assertEqual(expected, actual)
 
     def test_down_with_decimal_parameter_should_return_correct_command(self):
         actual = generate_commands("""
             main() { takeoff(); down(1.0); land(); }
         """)
-        expected = [SingleDroneCommand("default", Command.takeoff()),
-                    SingleDroneCommand("default", Command.down(1.0)),
-                    SingleDroneCommand("default", Command.land())]
+        expected = [SingleDroneCommand("DEFAULT", Command.takeoff()),
+                    SingleDroneCommand("DEFAULT", Command.down(1.0)),
+                    SingleDroneCommand("DEFAULT", Command.land())]
         self.assertEqual(expected, actual)
 
     def test_down_with_incorrect_parameter_should_give_error(self):
-        types = [Type.boolean(), Type.string(), Type.vector(), Type.list_of(Type.int()),
-                 Type.list_of(Type.list_of(Type.int()))]
+        types = [Type.boolean(), Type.string(), Type.vector(), Type.drone(),
+                 Type.list_of(Type.int()), Type.list_of(Type.list_of(Type.int()))]
         for type in types:
             with self.assertRaises(CompileError) as context:
                 generate_commands("""
@@ -100,23 +100,23 @@ class MovementCommandsTest(unittest.TestCase):
         actual = generate_commands("""
             main() { takeoff(); left(1); land(); }
         """)
-        expected = [SingleDroneCommand("default", Command.takeoff()),
-                    SingleDroneCommand("default", Command.left(1)),
-                    SingleDroneCommand("default", Command.land())]
+        expected = [SingleDroneCommand("DEFAULT", Command.takeoff()),
+                    SingleDroneCommand("DEFAULT", Command.left(1)),
+                    SingleDroneCommand("DEFAULT", Command.land())]
         self.assertEqual(expected, actual)
 
     def test_left_with_decimal_parameter_should_return_correct_command(self):
         actual = generate_commands("""
             main() { takeoff(); left(1.0); land(); }
         """)
-        expected = [SingleDroneCommand("default", Command.takeoff()),
-                    SingleDroneCommand("default", Command.left(1.0)),
-                    SingleDroneCommand("default", Command.land())]
+        expected = [SingleDroneCommand("DEFAULT", Command.takeoff()),
+                    SingleDroneCommand("DEFAULT", Command.left(1.0)),
+                    SingleDroneCommand("DEFAULT", Command.land())]
         self.assertEqual(expected, actual)
 
     def test_left_with_incorrect_parameter_should_give_error(self):
-        types = [Type.boolean(), Type.string(), Type.vector(), Type.list_of(Type.int()),
-                 Type.list_of(Type.list_of(Type.int()))]
+        types = [Type.boolean(), Type.string(), Type.vector(), Type.drone(),
+                 Type.list_of(Type.int()), Type.list_of(Type.list_of(Type.int()))]
         for type in types:
             with self.assertRaises(CompileError) as context:
                 generate_commands("""
@@ -136,23 +136,23 @@ class MovementCommandsTest(unittest.TestCase):
         actual = generate_commands("""
             main() { takeoff(); right(1); land(); }
         """)
-        expected = [SingleDroneCommand("default", Command.takeoff()),
-                    SingleDroneCommand("default", Command.right(1)),
-                    SingleDroneCommand("default", Command.land())]
+        expected = [SingleDroneCommand("DEFAULT", Command.takeoff()),
+                    SingleDroneCommand("DEFAULT", Command.right(1)),
+                    SingleDroneCommand("DEFAULT", Command.land())]
         self.assertEqual(expected, actual)
 
     def test_right_with_decimal_parameter_should_return_correct_command(self):
         actual = generate_commands("""
             main() { takeoff(); right(1.0); land(); }
         """)
-        expected = [SingleDroneCommand("default", Command.takeoff()),
-                    SingleDroneCommand("default", Command.right(1.0)),
-                    SingleDroneCommand("default", Command.land())]
+        expected = [SingleDroneCommand("DEFAULT", Command.takeoff()),
+                    SingleDroneCommand("DEFAULT", Command.right(1.0)),
+                    SingleDroneCommand("DEFAULT", Command.land())]
         self.assertEqual(expected, actual)
 
     def test_right_with_incorrect_parameter_should_give_error(self):
-        types = [Type.boolean(), Type.string(), Type.vector(), Type.list_of(Type.int()),
-                 Type.list_of(Type.list_of(Type.int()))]
+        types = [Type.boolean(), Type.string(), Type.vector(), Type.drone(),
+                 Type.list_of(Type.int()), Type.list_of(Type.list_of(Type.int()))]
         for type in types:
             with self.assertRaises(CompileError) as context:
                 generate_commands("""
@@ -172,23 +172,23 @@ class MovementCommandsTest(unittest.TestCase):
         actual = generate_commands("""
             main() { takeoff(); forward(1); land(); }
         """)
-        expected = [SingleDroneCommand("default", Command.takeoff()),
-                    SingleDroneCommand("default", Command.forward(1)),
-                    SingleDroneCommand("default", Command.land())]
+        expected = [SingleDroneCommand("DEFAULT", Command.takeoff()),
+                    SingleDroneCommand("DEFAULT", Command.forward(1)),
+                    SingleDroneCommand("DEFAULT", Command.land())]
         self.assertEqual(expected, actual)
 
     def test_forward_with_decimal_parameter_should_return_correct_command(self):
         actual = generate_commands("""
             main() { takeoff(); forward(1.0); land(); }
         """)
-        expected = [SingleDroneCommand("default", Command.takeoff()),
-                    SingleDroneCommand("default", Command.forward(1.0)),
-                    SingleDroneCommand("default", Command.land())]
+        expected = [SingleDroneCommand("DEFAULT", Command.takeoff()),
+                    SingleDroneCommand("DEFAULT", Command.forward(1.0)),
+                    SingleDroneCommand("DEFAULT", Command.land())]
         self.assertEqual(expected, actual)
 
     def test_forward_with_incorrect_parameter_should_give_error(self):
-        types = [Type.boolean(), Type.string(), Type.vector(), Type.list_of(Type.int()),
-                 Type.list_of(Type.list_of(Type.int()))]
+        types = [Type.boolean(), Type.string(), Type.vector(), Type.drone(),
+                 Type.list_of(Type.int()), Type.list_of(Type.list_of(Type.int()))]
         for type in types:
             with self.assertRaises(CompileError) as context:
                 generate_commands("""
@@ -208,23 +208,23 @@ class MovementCommandsTest(unittest.TestCase):
         actual = generate_commands("""
             main() { takeoff(); backward(1); land(); }
         """)
-        expected = [SingleDroneCommand("default", Command.takeoff()),
-                    SingleDroneCommand("default", Command.backward(1)),
-                    SingleDroneCommand("default", Command.land())]
+        expected = [SingleDroneCommand("DEFAULT", Command.takeoff()),
+                    SingleDroneCommand("DEFAULT", Command.backward(1)),
+                    SingleDroneCommand("DEFAULT", Command.land())]
         self.assertEqual(expected, actual)
 
     def test_backward_with_decimal_parameter_should_return_correct_command(self):
         actual = generate_commands("""
             main() { takeoff(); backward(1.0); land(); }
         """)
-        expected = [SingleDroneCommand("default", Command.takeoff()),
-                    SingleDroneCommand("default", Command.backward(1.0)),
-                    SingleDroneCommand("default", Command.land())]
+        expected = [SingleDroneCommand("DEFAULT", Command.takeoff()),
+                    SingleDroneCommand("DEFAULT", Command.backward(1.0)),
+                    SingleDroneCommand("DEFAULT", Command.land())]
         self.assertEqual(expected, actual)
 
     def test_backward_with_incorrect_parameter_should_give_error(self):
-        types = [Type.boolean(), Type.string(), Type.vector(), Type.list_of(Type.int()),
-                 Type.list_of(Type.list_of(Type.int()))]
+        types = [Type.boolean(), Type.string(), Type.vector(), Type.drone(),
+                 Type.list_of(Type.int()), Type.list_of(Type.list_of(Type.int()))]
         for type in types:
             with self.assertRaises(CompileError) as context:
                 generate_commands("""
@@ -244,23 +244,23 @@ class MovementCommandsTest(unittest.TestCase):
         actual = generate_commands("""
             main() { takeoff(); rotate_left(1); land(); }
         """)
-        expected = [SingleDroneCommand("default", Command.takeoff()),
-                    SingleDroneCommand("default", Command.rotate_left(1)),
-                    SingleDroneCommand("default", Command.land())]
+        expected = [SingleDroneCommand("DEFAULT", Command.takeoff()),
+                    SingleDroneCommand("DEFAULT", Command.rotate_left(1)),
+                    SingleDroneCommand("DEFAULT", Command.land())]
         self.assertEqual(expected, actual)
 
     def test_rotate_left_with_decimal_parameter_should_return_correct_command(self):
         actual = generate_commands("""
             main() { takeoff(); rotate_left(1.0); land(); }
         """)
-        expected = [SingleDroneCommand("default", Command.takeoff()),
-                    SingleDroneCommand("default", Command.rotate_left(1.0)),
-                    SingleDroneCommand("default", Command.land())]
+        expected = [SingleDroneCommand("DEFAULT", Command.takeoff()),
+                    SingleDroneCommand("DEFAULT", Command.rotate_left(1.0)),
+                    SingleDroneCommand("DEFAULT", Command.land())]
         self.assertEqual(expected, actual)
 
     def test_rotate_left_with_incorrect_parameter_should_give_error(self):
-        types = [Type.boolean(), Type.string(), Type.vector(), Type.list_of(Type.int()),
-                 Type.list_of(Type.list_of(Type.int()))]
+        types = [Type.boolean(), Type.string(), Type.vector(), Type.drone(),
+                 Type.list_of(Type.int()), Type.list_of(Type.list_of(Type.int()))]
         for type in types:
             with self.assertRaises(CompileError) as context:
                 generate_commands("""
@@ -280,23 +280,23 @@ class MovementCommandsTest(unittest.TestCase):
         actual = generate_commands("""
             main() { takeoff(); rotate_right(1); land(); }
         """)
-        expected = [SingleDroneCommand("default", Command.takeoff()),
-                    SingleDroneCommand("default", Command.rotate_right(1)),
-                    SingleDroneCommand("default", Command.land())]
+        expected = [SingleDroneCommand("DEFAULT", Command.takeoff()),
+                    SingleDroneCommand("DEFAULT", Command.rotate_right(1)),
+                    SingleDroneCommand("DEFAULT", Command.land())]
         self.assertEqual(expected, actual)
 
     def test_rotate_right_with_decimal_parameter_should_return_correct_command(self):
         actual = generate_commands("""
             main() { takeoff(); rotate_right(1.0); land(); }
         """)
-        expected = [SingleDroneCommand("default", Command.takeoff()),
-                    SingleDroneCommand("default", Command.rotate_right(1)),
-                    SingleDroneCommand("default", Command.land())]
+        expected = [SingleDroneCommand("DEFAULT", Command.takeoff()),
+                    SingleDroneCommand("DEFAULT", Command.rotate_right(1)),
+                    SingleDroneCommand("DEFAULT", Command.land())]
         self.assertEqual(expected, actual)
 
     def test_rotate_right_with_incorrect_parameter_should_give_error(self):
-        types = [Type.boolean(), Type.string(), Type.vector(), Type.list_of(Type.int()),
-                 Type.list_of(Type.list_of(Type.int()))]
+        types = [Type.boolean(), Type.string(), Type.vector(), Type.drone(),
+                 Type.list_of(Type.int()), Type.list_of(Type.list_of(Type.int()))]
         for type in types:
             with self.assertRaises(CompileError) as context:
                 generate_commands("""
@@ -316,19 +316,19 @@ class MovementCommandsTest(unittest.TestCase):
         actual = generate_commands("""
             main() { wait(1); }
         """)
-        expected = [SingleDroneCommand("default", Command.wait(1))]
+        expected = [SingleDroneCommand("DEFAULT", Command.wait(1))]
         self.assertEqual(expected, actual)
 
     def test_wait_with_decimal_parameter_should_return_correct_command(self):
         actual = generate_commands("""
             main() { wait(1.0); }
         """)
-        expected = [SingleDroneCommand("default", Command.wait(1.0))]
+        expected = [SingleDroneCommand("DEFAULT", Command.wait(1.0))]
         self.assertEqual(expected, actual)
 
     def test_wait_with_incorrect_parameter_should_give_error(self):
-        types = [Type.boolean(), Type.string(), Type.vector(), Type.list_of(Type.int()),
-                 Type.list_of(Type.list_of(Type.int()))]
+        types = [Type.boolean(), Type.string(), Type.vector(), Type.drone(),
+                 Type.list_of(Type.int()), Type.list_of(Type.list_of(Type.int()))]
         for type in types:
             with self.assertRaises(CompileError) as context:
                 generate_commands("""
@@ -358,15 +358,15 @@ class MovementCommandsTest(unittest.TestCase):
              land(); 
             }
         """)
-        expected = [SingleDroneCommand("default", Command.takeoff()),
-                    SingleDroneCommand("default", Command.up(1)),
-                    SingleDroneCommand("default", Command.down(2)),
-                    SingleDroneCommand("default", Command.left(3)),
-                    SingleDroneCommand("default", Command.right(4)),
-                    SingleDroneCommand("default", Command.forward(5)),
-                    SingleDroneCommand("default", Command.backward(6)),
-                    SingleDroneCommand("default", Command.rotate_left(7)),
-                    SingleDroneCommand("default", Command.rotate_right(8)),
-                    SingleDroneCommand("default", Command.wait(9)),
-                    SingleDroneCommand("default", Command.land())]
+        expected = [SingleDroneCommand("DEFAULT", Command.takeoff()),
+                    SingleDroneCommand("DEFAULT", Command.up(1)),
+                    SingleDroneCommand("DEFAULT", Command.down(2)),
+                    SingleDroneCommand("DEFAULT", Command.left(3)),
+                    SingleDroneCommand("DEFAULT", Command.right(4)),
+                    SingleDroneCommand("DEFAULT", Command.forward(5)),
+                    SingleDroneCommand("DEFAULT", Command.backward(6)),
+                    SingleDroneCommand("DEFAULT", Command.rotate_left(7)),
+                    SingleDroneCommand("DEFAULT", Command.rotate_right(8)),
+                    SingleDroneCommand("DEFAULT", Command.wait(9)),
+                    SingleDroneCommand("DEFAULT", Command.land())]
         self.assertEqual(expected, actual)

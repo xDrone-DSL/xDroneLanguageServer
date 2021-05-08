@@ -12,7 +12,7 @@ from xdrone.shared.safety_config import SafetyConfig
 class GenerateCommandsTest(unittest.TestCase):
     def test_basic_program(self):
         commands = "main() {takeoff(); land();}"
-        expected = [SingleDroneCommand("default", Command.takeoff()), SingleDroneCommand("default", Command.land())]
+        expected = [SingleDroneCommand("DEFAULT", Command.takeoff()), SingleDroneCommand("DEFAULT", Command.land())]
         self.assertEqual(expected, generate_commands(commands))
 
     def test_syntax_error_should_be_reported(self):
@@ -42,11 +42,11 @@ class GenerateCommandsTest(unittest.TestCase):
         commands = "main() {takeoff(); land();}"
         with self.assertRaises(SafetyCheckError) as context:
             generate_commands(commands,
-                              drone_config_map={"default": DroneConfig(init_position=(0, 0, 0),
+                              drone_config_map={"DEFAULT": DroneConfig(init_position=(0, 0, 0),
                                                                        speed_mps=1, rotate_speed_dps=90,
                                                                        takeoff_height_meters=10)},
                               safety_checker=SafetyChecker(SafetyConfig(max_seconds=10, max_z_meters=1)))
-        self.assertTrue("Drone 'default': the z coordinate 10 will go beyond its upper limit 1"
+        self.assertTrue("Drone 'DEFAULT': the z coordinate 10 will go beyond its upper limit 1"
                         in str(context.exception))
 
     def test_if_not_given_safety_checker_should_use_default_to_check_safety(self):
@@ -57,5 +57,5 @@ class GenerateCommandsTest(unittest.TestCase):
         commands = "main() {takeoff(); up(1000); land();}"
         with self.assertRaises(SafetyCheckError) as context:
             generate_commands(commands, safety_checker=SafetyChecker(SafetyConfig(max_seconds=10000, max_z_meters=1)))
-        self.assertTrue("Drone 'default': the z coordinate 1001 will go beyond its upper limit 1"
+        self.assertTrue("Drone 'DEFAULT': the z coordinate 1001 will go beyond its upper limit 1"
                         in str(context.exception))

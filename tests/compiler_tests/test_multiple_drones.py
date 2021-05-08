@@ -10,112 +10,126 @@ from xdrone.shared.drone_config import DefaultDroneConfig
 
 class MultipleDroneMovementTest(unittest.TestCase):
     def test_movement_with_no_name_specified_if_only_one_drone_should_use_that_drone(self):
-        drone_config_map = {"the_one": DefaultDroneConfig()}
+        drone_config_map = {"THE_ONE": DefaultDroneConfig()}
         actual = generate_commands("""
             main() { takeoff(); land(); }
         """, drone_config_map=drone_config_map)
-        expected = [SingleDroneCommand("the_one", Command.takeoff()),
-                    SingleDroneCommand("the_one", Command.land())]
+        expected = [SingleDroneCommand("THE_ONE", Command.takeoff()),
+                    SingleDroneCommand("THE_ONE", Command.land())]
         self.assertEqual(expected, actual)
 
     def test_movement_with_no_name_specified_if_multiple_drones_should_give_error(self):
-        drone_config_map = {"drone1": DefaultDroneConfig(), "drone2": DefaultDroneConfig()}
+        drone_config_map = {"DRONE1": DefaultDroneConfig(), "DRONE2": DefaultDroneConfig()}
         with self.assertRaises(CompileError) as context:
             generate_commands("""
                 main() { takeoff(); land(); }
             """, drone_config_map=drone_config_map)
-        print(context.exception)
         self.assertTrue("Drone should be specified if there are multiple drones in config"
                         in str(context.exception))
 
     def test_movement_with_undefined_name_specified_should_give_error(self):
-        drone_config_map = {"drone1": DefaultDroneConfig()}
+        drone_config_map = {"DRONE1": DefaultDroneConfig()}
         with self.assertRaises(CompileError) as context:
             generate_commands("""
-                main() { drone2.takeoff(); drone2.land(); }
+                main() { DRONE2.takeoff(); DRONE2.land(); }
             """, drone_config_map=drone_config_map)
-        print(context.exception)
-        self.assertTrue("Identifier drone2 has not been declared"
+        self.assertTrue("Identifier DRONE2 has not been declared"
                         in str(context.exception))
 
+    def test_movement_with_null_drone_should_give_error(self):
+        with self.assertRaises(CompileError) as context:
+            generate_commands("""
+                main() { drone d; d.takeoff(); d.land(); }
+            """, )
+        self.assertTrue("Drone has not been assigned"
+                        in str(context.exception))
 
-class ParallelCommand(object):
-    pass
+    def test_movement_with_other_type_should_give_error(self):
+        types = [Type.int(), Type.decimal(), Type.string(), Type.boolean(), Type.vector(),
+                 Type.list_of(Type.int()), Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
+        for type in types:
+            with self.assertRaises(CompileError) as context:
+                generate_commands("""
+                    main() {{ {} a; a.takeoff(); a.land(); }}
+                """.format(type))
+            self.assertTrue("Expression {} should have type drone, but is {}"
+                            .format(Expression(type, type.default_value, ident="a"), type.type_name)
+                            in str(context.exception))
 
 
 class ParallelTest(unittest.TestCase):
     def test_parallel_with_different_drones_should_give_correct_commands(self):
-        drone_config_map = {"drone1": DefaultDroneConfig(),
-                            "drone2": DefaultDroneConfig(),
-                            "drone3": DefaultDroneConfig()}
+        drone_config_map = {"DRONE1": DefaultDroneConfig(),
+                            "DRONE2": DefaultDroneConfig(),
+                            "DRONE3": DefaultDroneConfig()}
         actual = generate_commands("""
             main() { 
-              {drone1.takeoff();} || {drone2.takeoff();} || {drone3.takeoff();}; 
+              {DRONE1.takeoff();} || {DRONE2.takeoff();} || {DRONE3.takeoff();}; 
               {
-                drone1.land();
+                DRONE1.land();
               } || {
-                {drone2.land();} || {drone3.land();};
+                {DRONE2.land();} || {DRONE3.land();};
               };
             }
         """, drone_config_map=drone_config_map)
-        expected = [ParallelDroneCommands([[SingleDroneCommand("drone1", Command.takeoff())],
-                                           [SingleDroneCommand("drone2", Command.takeoff())],
-                                           [SingleDroneCommand("drone3", Command.takeoff())]]),
-                    ParallelDroneCommands([[SingleDroneCommand("drone1", Command.land())],
+        expected = [ParallelDroneCommands([[SingleDroneCommand("DRONE1", Command.takeoff())],
+                                           [SingleDroneCommand("DRONE2", Command.takeoff())],
+                                           [SingleDroneCommand("DRONE3", Command.takeoff())]]),
+                    ParallelDroneCommands([[SingleDroneCommand("DRONE1", Command.land())],
                                            [ParallelDroneCommands([
-                                               [SingleDroneCommand("drone2", Command.land())],
-                                               [SingleDroneCommand("drone3", Command.land())]
+                                               [SingleDroneCommand("DRONE2", Command.land())],
+                                               [SingleDroneCommand("DRONE3", Command.land())]
                                            ])]])]
         self.assertEqual(expected, actual)
 
     def test_parallel_with_repeated_drones_in_branches_should_give_error(self):
-        drone_config_map = {"drone1": DefaultDroneConfig(),
-                            "drone2": DefaultDroneConfig(),
-                            "drone3": DefaultDroneConfig()}
+        drone_config_map = {"DRONE1": DefaultDroneConfig(),
+                            "DRONE2": DefaultDroneConfig(),
+                            "DRONE3": DefaultDroneConfig()}
         with self.assertRaises(CompileError) as context:
             generate_commands("""
                 procedure foo() {
-                  drone1.takeoff();
-                  drone2.takeoff();
-                  drone1.land();
-                  drone2.land();
+                  DRONE1.takeoff();
+                  DRONE2.takeoff();
+                  DRONE1.land();
+                  DRONE2.land();
                 }
                 procedure bar() {
-                  drone2.takeoff();
-                  drone3.takeoff();
-                  drone2.land();
-                  drone3.land();
+                  DRONE2.takeoff();
+                  DRONE3.takeoff();
+                  DRONE2.land();
+                  DRONE3.land();
                 }
                 main() { 
-                  {foo();} || {bar();} || {drone3.takeoff(); drone3.land();}; 
+                  {foo();} || {bar();} || {DRONE3.takeoff(); DRONE3.land();}; 
                 }
             """, drone_config_map=drone_config_map)
         self.assertTrue("Parallel branches should have exclusive drone names, " +
-                        "but {'drone2'} appeared in more than one branches"
+                        "but {'DRONE2'} appeared in more than one branches"
                         in str(context.exception))
 
     def test_parallel_return_in_branch_should_return_early(self):
-        drone_config_map = {"drone1": DefaultDroneConfig(),
-                            "drone2": DefaultDroneConfig(),
-                            "drone3": DefaultDroneConfig()}
+        drone_config_map = {"DRONE1": DefaultDroneConfig(),
+                            "DRONE2": DefaultDroneConfig(),
+                            "DRONE3": DefaultDroneConfig()}
         actual = generate_commands("""
             main() { 
-              {return; drone1.takeoff();} || {drone2.takeoff(); drone2.land();}; 
+              {return; DRONE1.takeoff();} || {DRONE2.takeoff(); DRONE2.land();}; 
             }
         """, drone_config_map=drone_config_map)
         expected = [ParallelDroneCommands([[],
-                                           [SingleDroneCommand("drone2", Command.takeoff()),
-                                            SingleDroneCommand("drone2", Command.land())]])]
+                                           [SingleDroneCommand("DRONE2", Command.takeoff()),
+                                            SingleDroneCommand("DRONE2", Command.land())]])]
         self.assertEqual(expected, actual)
 
     def test_parallel_return_with_value_in_branch_should_give_error(self):
-        drone_config_map = {"drone1": DefaultDroneConfig(),
-                            "drone2": DefaultDroneConfig(),
-                            "drone3": DefaultDroneConfig()}
+        drone_config_map = {"DRONE1": DefaultDroneConfig(),
+                            "DRONE2": DefaultDroneConfig(),
+                            "DRONE3": DefaultDroneConfig()}
         with self.assertRaises(CompileError) as context:
             generate_commands("""
                 main() { 
-                  {return 1; drone1.takeoff();} || {drone2.takeoff(); drone2.land();}; 
+                  {return 1; DRONE1.takeoff();} || {DRONE2.takeoff(); DRONE2.land();}; 
                 }
             """, drone_config_map=drone_config_map)
         self.assertTrue("Parallel branch should not return anything, but {} is returned"

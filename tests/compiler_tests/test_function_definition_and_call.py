@@ -11,8 +11,8 @@ from xdrone.shared.compile_error import CompileError
 
 class FunctionDefinitionTest(unittest.TestCase):
     def test_define_functions_should_change_function_table(self):
-        types = [Type.int(), Type.decimal(), Type.string(), Type.boolean(), Type.vector(), Type.list_of(Type.int()),
-                 Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
+        types = [Type.int(), Type.decimal(), Type.string(), Type.boolean(), Type.vector(), Type.drone(),
+                 Type.list_of(Type.int()), Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
         for type in types:
             actual = FunctionTable()
             generate_commands("""
@@ -26,8 +26,8 @@ class FunctionDefinitionTest(unittest.TestCase):
             self.assertEqual(expected, actual)
 
     def test_define_functions_with_parameter_should_change_function_table(self):
-        types = [Type.int(), Type.decimal(), Type.string(), Type.boolean(), Type.vector(), Type.list_of(Type.int()),
-                 Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
+        types = [Type.int(), Type.decimal(), Type.string(), Type.boolean(), Type.vector(), Type.drone(),
+                 Type.list_of(Type.int()), Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
         for type1 in types:
             for type2 in types:
                 actual = FunctionTable()
@@ -42,8 +42,8 @@ class FunctionDefinitionTest(unittest.TestCase):
                 self.assertEqual(expected, actual)
 
     def test_define_functions_with_duplicated_parameter_should_give_error(self):
-        types = [Type.int(), Type.decimal(), Type.string(), Type.boolean(), Type.vector(), Type.list_of(Type.int()),
-                 Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
+        types = [Type.int(), Type.decimal(), Type.string(), Type.boolean(), Type.vector(), Type.drone(),
+                 Type.list_of(Type.int()), Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
         for type1 in types:
             for type2 in types:
                 with self.assertRaises(CompileError) as context:
@@ -76,8 +76,8 @@ class FunctionDefinitionTest(unittest.TestCase):
 
 class ReturnTest(unittest.TestCase):
     def test_return_correct_type_in_function_should_return_correct_value(self):
-        types = [Type.int(), Type.decimal(), Type.string(), Type.boolean(), Type.vector(), Type.list_of(Type.int()),
-                 Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
+        types = [Type.int(), Type.decimal(), Type.string(), Type.boolean(), Type.vector(), Type.drone(),
+                 Type.list_of(Type.int()), Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
         for type in types:
             actual = SymbolTable()
             generate_commands("""
@@ -106,8 +106,8 @@ class ReturnTest(unittest.TestCase):
         self.assertEqual([], commands)
 
     def test_return_wrong_type_in_function_should_give_error(self):
-        types = [Type.int(), Type.decimal(), Type.string(), Type.boolean(), Type.vector(), Type.list_of(Type.int()),
-                 Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
+        types = [Type.int(), Type.decimal(), Type.string(), Type.boolean(), Type.vector(), Type.drone(),
+                 Type.list_of(Type.int()), Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
         for t1 in types:
             for t2 in types:
                 if t1 == t2:
@@ -127,8 +127,8 @@ class ReturnTest(unittest.TestCase):
                                 in str(context.exception))
 
     def test_return_empty_in_function_should_give_error(self):
-        types = [Type.int(), Type.decimal(), Type.string(), Type.boolean(), Type.vector(), Type.list_of(Type.int()),
-                 Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
+        types = [Type.int(), Type.decimal(), Type.string(), Type.boolean(), Type.vector(), Type.drone(),
+                 Type.list_of(Type.int()), Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
         for type in types:
             with self.assertRaises(CompileError) as context:
                 generate_commands("""
@@ -144,8 +144,8 @@ class ReturnTest(unittest.TestCase):
                             in str(context.exception))
 
     def test_return_not_exist_in_function_should_give_error(self):
-        types = [Type.int(), Type.decimal(), Type.string(), Type.boolean(), Type.vector(), Type.list_of(Type.int()),
-                 Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
+        types = [Type.int(), Type.decimal(), Type.string(), Type.boolean(), Type.vector(), Type.drone(),
+                 Type.list_of(Type.int()), Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
         for type in types:
             with self.assertRaises(CompileError) as context:
                 generate_commands("""
@@ -182,8 +182,8 @@ class ReturnTest(unittest.TestCase):
         self.assertEqual([], commands)
 
     def test_return_value_in_procedure_should_give_error(self):
-        types = [Type.int(), Type.decimal(), Type.string(), Type.boolean(), Type.vector(), Type.list_of(Type.int()),
-                 Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
+        types = [Type.int(), Type.decimal(), Type.string(), Type.boolean(), Type.vector(), Type.drone(),
+                 Type.list_of(Type.int()), Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
         for type in types:
             with self.assertRaises(CompileError) as context:
                 generate_commands("""
@@ -200,8 +200,8 @@ class ReturnTest(unittest.TestCase):
                             in str(context.exception))
 
     def test_return_in_main_should_give_error(self):
-        types = [Type.int(), Type.decimal(), Type.string(), Type.boolean(), Type.vector(), Type.list_of(Type.int()),
-                 Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
+        types = [Type.int(), Type.decimal(), Type.string(), Type.boolean(), Type.vector(), Type.drone(),
+                 Type.list_of(Type.int()), Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
         for type in types:
             with self.assertRaises(CompileError) as context:
                 generate_commands("""
@@ -235,10 +235,10 @@ class ProcedureCallTest(unittest.TestCase):
               land();
             }
             """)
-        expected_commands = [SingleDroneCommand("default", Command.takeoff()),
-                             SingleDroneCommand("default", Command.up(300)),
-                             SingleDroneCommand("default", Command.down(100)),
-                             SingleDroneCommand("default", Command.land())]
+        expected_commands = [SingleDroneCommand("DEFAULT", Command.takeoff()),
+                             SingleDroneCommand("DEFAULT", Command.up(300)),
+                             SingleDroneCommand("DEFAULT", Command.down(100)),
+                             SingleDroneCommand("DEFAULT", Command.land())]
         self.assertEqual(expected_commands, commands)
 
     def test_procedure_error_but_not_called_should_not_give_error(self):
@@ -278,8 +278,8 @@ class ProcedureCallTest(unittest.TestCase):
                         in str(context.exception))
 
     def test_call_procedure_with_wrong_type_argument_should_give_error(self):
-        types = [Type.int(), Type.decimal(), Type.string(), Type.boolean(), Type.vector(), Type.list_of(Type.int()),
-                 Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
+        types = [Type.int(), Type.decimal(), Type.string(), Type.boolean(), Type.vector(), Type.drone(),
+                 Type.list_of(Type.int()), Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
         for t1 in types:
             for t2 in types:
                 if t1 == t2:
@@ -329,11 +329,11 @@ class FunctionCallTest(unittest.TestCase):
               land();
             }
             """)
-        expected_commands = [SingleDroneCommand("default", Command.takeoff()),
-                             SingleDroneCommand("default", Command.up(300)),
-                             SingleDroneCommand("default", Command.down(100)),
-                             SingleDroneCommand("default", Command.forward(300)),
-                             SingleDroneCommand("default", Command.land())]
+        expected_commands = [SingleDroneCommand("DEFAULT", Command.takeoff()),
+                             SingleDroneCommand("DEFAULT", Command.up(300)),
+                             SingleDroneCommand("DEFAULT", Command.down(100)),
+                             SingleDroneCommand("DEFAULT", Command.forward(300)),
+                             SingleDroneCommand("DEFAULT", Command.land())]
         self.assertEqual(expected_commands, commands)
 
     def test_function_error_but_not_called_should_not_give_error(self):
@@ -372,8 +372,8 @@ class FunctionCallTest(unittest.TestCase):
                         in str(context.exception))
 
     def test_call_function_with_wrong_type_argument_should_give_error(self):
-        types = [Type.int(), Type.decimal(), Type.string(), Type.boolean(), Type.vector(), Type.list_of(Type.int()),
-                 Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
+        types = [Type.int(), Type.decimal(), Type.string(), Type.boolean(), Type.vector(), Type.drone(),
+                 Type.list_of(Type.int()), Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
         for t1 in types:
             for t2 in types:
                 if t1 == t2:
@@ -419,9 +419,9 @@ class ComplexFunctionTest(unittest.TestCase):
               land();
             }
             """)
-        expected_commands = [SingleDroneCommand("default", Command.takeoff()),
-                             SingleDroneCommand("default", Command.forward(10)),
-                             SingleDroneCommand("default", Command.land())]
+        expected_commands = [SingleDroneCommand("DEFAULT", Command.takeoff()),
+                             SingleDroneCommand("DEFAULT", Command.forward(10)),
+                             SingleDroneCommand("DEFAULT", Command.land())]
         self.assertEqual(expected_commands, commands)
 
     def test_loops_in_function(self):
@@ -438,9 +438,9 @@ class ComplexFunctionTest(unittest.TestCase):
               land();
             }
             """)
-        expected_commands = [SingleDroneCommand("default", Command.takeoff()),
-                             SingleDroneCommand("default", Command.forward(10)),
-                             SingleDroneCommand("default", Command.land())]
+        expected_commands = [SingleDroneCommand("DEFAULT", Command.takeoff()),
+                             SingleDroneCommand("DEFAULT", Command.forward(10)),
+                             SingleDroneCommand("DEFAULT", Command.land())]
         self.assertEqual(expected_commands, commands)
 
     def test_function_procedure_in_function(self):
@@ -464,10 +464,10 @@ class ComplexFunctionTest(unittest.TestCase):
               land();
             }
             """)
-        expected_commands = [SingleDroneCommand("default", Command.takeoff()),
-                             SingleDroneCommand("default", Command.forward(100)),
-                             SingleDroneCommand("default", Command.forward(100)),
-                             SingleDroneCommand("default", Command.land())]
+        expected_commands = [SingleDroneCommand("DEFAULT", Command.takeoff()),
+                             SingleDroneCommand("DEFAULT", Command.forward(100)),
+                             SingleDroneCommand("DEFAULT", Command.forward(100)),
+                             SingleDroneCommand("DEFAULT", Command.land())]
         self.assertEqual(expected_commands, commands)
 
     def test_scope(self):
@@ -487,9 +487,9 @@ class ComplexFunctionTest(unittest.TestCase):
               land();
             }
             """, symbol_table=actual)
-        expected_commands = [SingleDroneCommand("default", Command.takeoff()),
-                             SingleDroneCommand("default", Command.forward(10)),
-                             SingleDroneCommand("default", Command.land())]
+        expected_commands = [SingleDroneCommand("DEFAULT", Command.takeoff()),
+                             SingleDroneCommand("DEFAULT", Command.forward(10)),
+                             SingleDroneCommand("DEFAULT", Command.land())]
         self.assertEqual(expected_commands, commands)
         expected = SymbolTable()
         expected.store("i", Expression(Type.int(), 1, ident="i"))
@@ -512,9 +512,9 @@ class ComplexProcedureTest(unittest.TestCase):
               land();
             }
             """)
-        expected_commands = [SingleDroneCommand("default", Command.takeoff()),
-                             SingleDroneCommand("default", Command.forward(10)),
-                             SingleDroneCommand("default", Command.land())]
+        expected_commands = [SingleDroneCommand("DEFAULT", Command.takeoff()),
+                             SingleDroneCommand("DEFAULT", Command.forward(10)),
+                             SingleDroneCommand("DEFAULT", Command.land())]
         self.assertEqual(expected_commands, commands)
 
     def test_loops_in_function(self):
@@ -531,9 +531,9 @@ class ComplexProcedureTest(unittest.TestCase):
               land();
             }
             """)
-        expected_commands = [SingleDroneCommand("default", Command.takeoff()),
-                             SingleDroneCommand("default", Command.forward(10)),
-                             SingleDroneCommand("default", Command.land())]
+        expected_commands = [SingleDroneCommand("DEFAULT", Command.takeoff()),
+                             SingleDroneCommand("DEFAULT", Command.forward(10)),
+                             SingleDroneCommand("DEFAULT", Command.land())]
         self.assertEqual(expected_commands, commands)
 
     def test_function_procedure_in_procedure(self):
@@ -554,10 +554,10 @@ class ComplexProcedureTest(unittest.TestCase):
               proc2();
             }
             """)
-        expected_commands = [SingleDroneCommand("default", Command.takeoff()),
-                             SingleDroneCommand("default", Command.forward(100)),
-                             SingleDroneCommand("default", Command.forward(100)),
-                             SingleDroneCommand("default", Command.land())]
+        expected_commands = [SingleDroneCommand("DEFAULT", Command.takeoff()),
+                             SingleDroneCommand("DEFAULT", Command.forward(100)),
+                             SingleDroneCommand("DEFAULT", Command.forward(100)),
+                             SingleDroneCommand("DEFAULT", Command.land())]
         self.assertEqual(expected_commands, commands)
 
     def test_scope(self):

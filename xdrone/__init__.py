@@ -22,7 +22,7 @@ from xdrone.state_updaters.state_updater import StateUpdater
 def generate_commands(program, drone_config_map: Dict[str, DroneConfig] = None, safety_checker: SafetyChecker = None,
                       symbol_table: SymbolTable = None, function_table: FunctionTable = None):
     if drone_config_map is None:
-        drone_config_map = {"default": DefaultDroneConfig()}
+        drone_config_map = {"DEFAULT": DefaultDroneConfig()}
     if safety_checker is None:
         safety_checker = SafetyChecker(SafetyConfig.no_limit())
     if symbol_table is None:

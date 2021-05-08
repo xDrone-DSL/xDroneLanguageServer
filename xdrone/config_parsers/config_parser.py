@@ -21,16 +21,16 @@ class ConfigParser:
             if len(data["drones"]) == 0:
                 warning("'drones' is empty when parsing configs, using default drone_config. " +
                         "Position estimation may be inaccurate.")
-                return {"default": DefaultDroneConfig()}
+                return {"DEFAULT": DefaultDroneConfig()}
             for drone in data["drones"]:
                 if "name" in drone:
                     name = drone["name"]
                     if name == "":
-                        warning("'name' cannot be an empty string, using default value 'default' instead.")
-                        name = "default"
+                        warning("'name' cannot be an empty string, using default value 'DEFAULT' instead.")
+                        name = "DEFAULT"
                 else:
-                    warning("'name' missing when parsing object in 'drones', using default value 'default'.")
-                    name = "default"
+                    warning("'name' missing when parsing object in 'drones', using default value 'DEFAULT'.")
+                    name = "DEFAULT"
 
                 if name in drone_config_map:
                     warning("Drone name '{}' appeared more than ones in 'drones', ignored.".format(name))
@@ -79,7 +79,7 @@ class ConfigParser:
         else:
             warning("'drones' missing when parsing configs, using default drone_config. " +
                     "Position estimation may be inaccurate.")
-            return {"default": DefaultDroneConfig()}
+            return {"DEFAULT": DefaultDroneConfig()}
         return drone_config_map
 
     @staticmethod

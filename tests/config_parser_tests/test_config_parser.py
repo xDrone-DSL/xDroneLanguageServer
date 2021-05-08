@@ -11,13 +11,13 @@ class ConfigParserTest(unittest.TestCase):
         config = """
             {
               "drones": [{
-                "name": "drone1",
+                "name": "DRONE1",
                 "init_position": {"x": 1, "y": 2, "z": 3},
                 "speed_mps": 2,
                 "rotate_speed_dps": 180,
                 "takeoff_height_meters": 2
               },{
-                "name": "drone2",
+                "name": "DRONE2",
                 "init_position": {"x": 4, "y": 5, "z": 6},
                 "speed_mps": 1,
                 "rotate_speed_dps": 90,
@@ -35,9 +35,9 @@ class ConfigParserTest(unittest.TestCase):
             }
             """
         actual_drone_config, actual_safety_config = ConfigParser.parse(config)
-        expected_drone_configs = {"drone1": DroneConfig(init_position=(1, 2, 3), speed_mps=2,
+        expected_drone_configs = {"DRONE1": DroneConfig(init_position=(1, 2, 3), speed_mps=2,
                                                         rotate_speed_dps=180, takeoff_height_meters=2),
-                                  "drone2": DroneConfig(init_position=(4, 5, 6), speed_mps=1,
+                                  "DRONE2": DroneConfig(init_position=(4, 5, 6), speed_mps=1,
                                                         rotate_speed_dps=90, takeoff_height_meters=1)}
         expected_safety_config = SafetyConfig(max_seconds=100, max_x_meters=10, max_y_meters=20, max_z_meters=30,
                                               min_x_meters=-10, min_y_meters=-20, min_z_meters=-30)
@@ -53,7 +53,7 @@ class ConfigParserTest(unittest.TestCase):
                         "WARNING:root:'safety_config' missing when parsing configs, using unlimited safety_config. " +
                         "Time and position will be unlimited."]
         self.assertEqual(expected_log, log.output)
-        self.assertEqual({"default": DefaultDroneConfig()}, actual_drone_configs)
+        self.assertEqual({"DEFAULT": DefaultDroneConfig()}, actual_drone_configs)
         self.assertEqual(SafetyConfig.no_limit(), actual_safety_config)
 
     def test_parse_if_configs_missing_fields_should_use_default_value(self):
@@ -83,7 +83,7 @@ class ConfigParserTest(unittest.TestCase):
                         "WARNING:root:'min_z_meters' missing when parsing 'safety_config', " +
                         "using default value -inf. There will be no limit on 'min_z_meters'."]
         self.assertEqual(expected_log, log.output)
-        expected_drone_configs = {"default": DefaultDroneConfig()}
+        expected_drone_configs = {"DEFAULT": DefaultDroneConfig()}
         expected_safety_config = SafetyConfig(max_seconds=float("inf"), max_x_meters=float("inf"),
                                               max_y_meters=float("inf"), max_z_meters=float("inf"),
                                               min_x_meters=float("-inf"), min_y_meters=float("-inf"),
@@ -108,17 +108,17 @@ class ConfigParserTest(unittest.TestCase):
             """
         with self.assertLogs(logging.getLogger()) as log:
             actual_drone_configs, actual_safety_config = ConfigParser.parse(config)
-        expected_log = ["WARNING:root:'name' missing when parsing object in 'drones', using default value 'default'.",
-                        "WARNING:root:'init_position' missing when parsing drone 'default', " +
+        expected_log = ["WARNING:root:'name' missing when parsing object in 'drones', using default value 'DEFAULT'.",
+                        "WARNING:root:'init_position' missing when parsing drone 'DEFAULT', " +
                         "using default value (0, 0, 0). Position estimation may be inaccurate.",
-                        "WARNING:root:'speed_mps' missing when parsing drone 'default', " +
+                        "WARNING:root:'speed_mps' missing when parsing drone 'DEFAULT', " +
                         "using default value 1. Position estimation may be inaccurate.",
-                        "WARNING:root:'rotate_speed_dps' missing when parsing drone 'default', " +
+                        "WARNING:root:'rotate_speed_dps' missing when parsing drone 'DEFAULT', " +
                         "using default value 90. Position estimation may be inaccurate.",
-                        "WARNING:root:'takeoff_height_meters' missing when parsing drone 'default', " +
+                        "WARNING:root:'takeoff_height_meters' missing when parsing drone 'DEFAULT', " +
                         "using default value 1. Position estimation may be inaccurate."]
         self.assertEqual(expected_log, log.output)
-        expected_drone_configs = {"default": DroneConfig(init_position=(0, 0, 0), speed_mps=1,
+        expected_drone_configs = {"DEFAULT": DroneConfig(init_position=(0, 0, 0), speed_mps=1,
                                                          rotate_speed_dps=90, takeoff_height_meters=1)}
         expected_safety_config = SafetyConfig(max_seconds=100, max_x_meters=10, max_y_meters=20, max_z_meters=30,
                                               min_x_meters=-10, min_y_meters=-20, min_z_meters=-30)
@@ -129,7 +129,7 @@ class ConfigParserTest(unittest.TestCase):
         config = """
             {
               "drones": [{
-                "name": "drone1",
+                "name": "DRONE1",
                 "init_position": {},
                 "speed_mps": 2,
                 "rotate_speed_dps": 180,
@@ -149,14 +149,14 @@ class ConfigParserTest(unittest.TestCase):
 
         with self.assertLogs(logging.getLogger()) as log:
             actual_drone_configs, actual_safety_config = ConfigParser.parse(config)
-        expected_log = ["WARNING:root:'x' missing when parsing drone 'drone1', using default value 0. " +
+        expected_log = ["WARNING:root:'x' missing when parsing drone 'DRONE1', using default value 0. " +
                         "Position estimation may be inaccurate.",
-                        "WARNING:root:'y' missing when parsing drone 'drone1', using default value 0. " +
+                        "WARNING:root:'y' missing when parsing drone 'DRONE1', using default value 0. " +
                         "Position estimation may be inaccurate.",
-                        "WARNING:root:'z' missing when parsing drone 'drone1', using default value 0. " +
+                        "WARNING:root:'z' missing when parsing drone 'DRONE1', using default value 0. " +
                         "Position estimation may be inaccurate."]
         self.assertEqual(expected_log, log.output)
-        expected_drone_configs = {"drone1": DroneConfig(init_position=(0, 0, 0), speed_mps=2,
+        expected_drone_configs = {"DRONE1": DroneConfig(init_position=(0, 0, 0), speed_mps=2,
                                                         rotate_speed_dps=180, takeoff_height_meters=2)}
         expected_safety_config = SafetyConfig(max_seconds=100, max_x_meters=10, max_y_meters=20, max_z_meters=30,
                                               min_x_meters=-10, min_y_meters=-20, min_z_meters=-30)
@@ -187,9 +187,9 @@ class ConfigParserTest(unittest.TestCase):
 
         with self.assertLogs(logging.getLogger()) as log:
             actual_drone_configs, actual_safety_config = ConfigParser.parse(config)
-        expected_log = ["WARNING:root:'name' cannot be an empty string, using default value 'default' instead."]
+        expected_log = ["WARNING:root:'name' cannot be an empty string, using default value 'DEFAULT' instead."]
         self.assertEqual(expected_log, log.output)
-        expected_drone_configs = {"default": DroneConfig(init_position=(1, 2, 3), speed_mps=2,
+        expected_drone_configs = {"DEFAULT": DroneConfig(init_position=(1, 2, 3), speed_mps=2,
                                                          rotate_speed_dps=180, takeoff_height_meters=2)}
         expected_safety_config = SafetyConfig(max_seconds=100, max_x_meters=10, max_y_meters=20, max_z_meters=30,
                                               min_x_meters=-10, min_y_meters=-20, min_z_meters=-30)
@@ -200,13 +200,13 @@ class ConfigParserTest(unittest.TestCase):
         config = """
             {
               "drones": [{
-                "name": "drone1",
+                "name": "DRONE1",
                 "init_position": {"x": 1, "y": 2, "z": 3},
                 "speed_mps": 2,
                 "rotate_speed_dps": 180,
                 "takeoff_height_meters": 2
               },{
-                "name": "drone1",
+                "name": "DRONE1",
                 "init_position": {"x": 4, "y": 5, "z": 6},
                 "speed_mps": 1,
                 "rotate_speed_dps": 90,
@@ -226,9 +226,9 @@ class ConfigParserTest(unittest.TestCase):
 
         with self.assertLogs(logging.getLogger()) as log:
             actual_drone_configs, actual_safety_config = ConfigParser.parse(config)
-        expected_log = ["WARNING:root:Drone name 'drone1' appeared more than ones in 'drones', ignored."]
+        expected_log = ["WARNING:root:Drone name 'DRONE1' appeared more than ones in 'drones', ignored."]
         self.assertEqual(expected_log, log.output)
-        expected_drone_configs = {"drone1": DroneConfig(init_position=(1, 2, 3), speed_mps=2,
+        expected_drone_configs = {"DRONE1": DroneConfig(init_position=(1, 2, 3), speed_mps=2,
                                                         rotate_speed_dps=180, takeoff_height_meters=2)}
         expected_safety_config = SafetyConfig(max_seconds=100, max_x_meters=10, max_y_meters=20, max_z_meters=30,
                                               min_x_meters=-10, min_y_meters=-20, min_z_meters=-30)
