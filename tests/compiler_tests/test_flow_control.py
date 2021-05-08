@@ -16,13 +16,12 @@ class IfTest(unittest.TestCase):
               takeoff();
               if true {
                 int a <- 1;
-                forward(1);
+                forward(a);
               }
               land();
             }
             """, symbol_table=actual_st)
         expected_st = SymbolTable()
-        expected_st.store("a", Expression(Type.int(), 1, ident="a"))
         self.assertEqual(expected_st, actual_st)
         expected_commands = [SingleDroneCommand("DEFAULT", Command.takeoff()),
                              SingleDroneCommand("DEFAULT", Command.forward(1)),
@@ -36,16 +35,15 @@ class IfTest(unittest.TestCase):
               takeoff();
               if true {
                 int a <- 1;
-                forward(1);
+                forward(a);
               } else {
                 int a <- 2;
-                forward(2);
+                forward(a);
               }
               land();
             }
             """, symbol_table=actual)
         expected = SymbolTable()
-        expected.store("a", Expression(Type.int(), 1, ident="a"))
         self.assertEqual(expected, actual)
         expected_commands = [SingleDroneCommand("DEFAULT", Command.takeoff()),
                              SingleDroneCommand("DEFAULT", Command.forward(1)),
@@ -73,18 +71,16 @@ class IfTest(unittest.TestCase):
               takeoff();
               if false {
                 int a <- 1;
-                forward(1);
+                forward(a);
               } else {
                 int a <- 2;
                 int b <- 3;
-                forward(3);
+                forward(b);
               }
               land();
             }
             """, symbol_table=actual)
         expected = SymbolTable()
-        expected.store("a", Expression(Type.int(), 2, ident="a"))
-        expected.store("b", Expression(Type.int(), 3, ident="b"))
         self.assertEqual(expected, actual)
         expected_commands = [SingleDroneCommand("DEFAULT", Command.takeoff()),
                              SingleDroneCommand("DEFAULT", Command.forward(3)),
@@ -125,6 +121,41 @@ class IfTest(unittest.TestCase):
             self.assertTrue("Expression {} should have type boolean, but is {}"
                             .format(Expression(type, type.default_value, ident="a"), type.type_name)
                             in str(context.exception))
+
+    def test_if_should_keep_updates_but_discard_new_variables(self):
+        actual = SymbolTable()
+        actual_commands = generate_commands("""
+            main () {
+              int a <- 1;
+              if true {
+                int b <- 1;
+                a <- 2;
+              }
+            }
+            """, symbol_table=actual)
+        expected = SymbolTable()
+        expected.store("a", Expression(Type.int(), 2, ident="a"))
+        self.assertEqual(expected, actual)
+        expected_commands = []
+        self.assertEqual(expected_commands, actual_commands)
+
+    def test_if_with_else_should_keep_updates_but_discard_new_variables(self):
+        actual = SymbolTable()
+        actual_commands = generate_commands("""
+            main () {
+              int a <- 1;
+              if false {
+              } else {
+                int b <- 1;
+                a <- 2;
+              }
+            }
+            """, symbol_table=actual)
+        expected = SymbolTable()
+        expected.store("a", Expression(Type.int(), 2, ident="a"))
+        self.assertEqual(expected, actual)
+        expected_commands = []
+        self.assertEqual(expected_commands, actual_commands)
 
 
 class WhileTest(unittest.TestCase):
@@ -198,6 +229,23 @@ class WhileTest(unittest.TestCase):
             self.assertTrue("Expression {} should have type boolean, but is {}"
                             .format(Expression(type, type.default_value, ident="a"), type.type_name)
                             in str(context.exception))
+
+    def test_while_should_keep_updates_but_discard_new_variables(self):
+        actual = SymbolTable()
+        actual_commands = generate_commands("""
+            main () {
+              int a <- 0;
+              while a < 5 {
+                int b <- 1;
+                a <- a + 1;
+              }
+            }
+            """, symbol_table=actual)
+        expected = SymbolTable()
+        expected.store("a", Expression(Type.int(), 5, ident="a"))
+        self.assertEqual(expected, actual)
+        expected_commands = []
+        self.assertEqual(expected_commands, actual_commands)
 
 
 class ForTest(unittest.TestCase):
@@ -365,6 +413,25 @@ class ForTest(unittest.TestCase):
                             .format(Expression(type, type.default_value, ident="a"), type.type_name)
                             in str(context.exception))
 
+    def test_for_should_keep_updates_but_discard_new_variables(self):
+        actual = SymbolTable()
+        actual_commands = generate_commands("""
+            main () {
+              int a <- 0;
+              int i <- 1;
+              for i from 1 to 5 {
+                int b <- 1;
+                a <- a + 1;
+              }
+            }
+            """, symbol_table=actual)
+        expected = SymbolTable()
+        expected.store("a", Expression(Type.int(), 5, ident="a"))
+        expected.store("i", Expression(Type.int(), 5, ident="i"))
+        self.assertEqual(expected, actual)
+        expected_commands = []
+        self.assertEqual(expected_commands, actual_commands)
+
 
 class RepeatTest(unittest.TestCase):
     def test_repeat_should_run_correct_commands(self):
@@ -398,3 +465,20 @@ class RepeatTest(unittest.TestCase):
             self.assertTrue("Expression {} should have type int, but is {}"
                             .format(Expression(type, type.default_value, ident="a"), type.type_name)
                             in str(context.exception))
+
+    def test_repeat_should_keep_updates_but_discard_new_variables(self):
+        actual = SymbolTable()
+        actual_commands = generate_commands("""
+            main () {
+              int a <- 0;
+              repeat 5 times {
+                int b <- 1;
+                a <- a + 1;
+              }
+            }
+            """, symbol_table=actual)
+        expected = SymbolTable()
+        expected.store("a", Expression(Type.int(), 5, ident="a"))
+        self.assertEqual(expected, actual)
+        expected_commands = []
+        self.assertEqual(expected_commands, actual_commands)

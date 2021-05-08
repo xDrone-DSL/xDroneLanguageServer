@@ -1,5 +1,5 @@
 import copy
-from typing import Union
+from typing import Union, Set
 
 from xdrone.compiler.compiler_utils.drones import Drone
 from xdrone.compiler.compiler_utils.expressions import Expression
@@ -40,3 +40,9 @@ class SymbolTable:
     def get_expression(self, ident: str) -> Expression:
         assert self.__contains__(ident), "Expression not in symbol table"
         return copy.deepcopy(self._symbol_table[ident])
+
+    def idents(self) -> Set[str]:
+        return set(self._symbol_table.keys())
+
+    def keep_idents(self, idents: Set[str]) -> None:
+        self._symbol_table = {ident: self._symbol_table[ident] for ident in idents}

@@ -313,22 +313,31 @@ class Compiler(xDroneParserVisitor):
             raise CompileError("Procedure call should not return any expression, but {} is returned".format(call))
         return call
 
+    def _visit_commands_with_scope(self, commands_ctx):
+        # keep updates on existing variables, discard new variables
+        prev_idents = self._get_latest_symbol_table().idents()
+        self.visit(commands_ctx)
+        self._get_latest_symbol_table().keep_idents(prev_idents)
+
     def visitIf(self, ctx: xDroneParser.IfContext) -> None:
         expr = self.visit(ctx.expr())
         if expr.type != Type.boolean():
             raise CompileError("Expression {} should have type boolean, but is {}".format(expr, expr.type))
         if expr.value:
-            self.visit(ctx.commands(0))
+            # scope - keep updates on existing variables, discard new variables
+            self._visit_commands_with_scope(ctx.commands(0))
         else:
             if ctx.ELSE():
-                self.visit(ctx.commands(1))
+                # scope - keep updates on existing variables, discard new variables
+                self._visit_commands_with_scope(ctx.commands(1))
 
     def visitWhile(self, ctx: xDroneParser.WhileContext) -> None:
         expr = self.visit(ctx.expr())
         if expr.type != Type.boolean():
             raise CompileError("Expression {} should have type boolean, but is {}".format(expr, expr.type))
         while expr.value:
-            self.visit(ctx.commands())
+            # scope - keep updates on existing variables, discard new variables
+            self._visit_commands_with_scope(ctx.commands())
             expr = self.visit(ctx.expr())
 
     def visitFor(self, ctx: xDroneParser.ForContext) -> None:
@@ -355,7 +364,8 @@ class Compiler(xDroneParserVisitor):
 
         for i in range(expr1.value, expr2.value + 1, step):
             self._get_latest_symbol_table().update(ident, i)
-            self.visit(ctx.commands())
+            # scope - keep updates on existing variables, discard new variables
+            self._visit_commands_with_scope(ctx.commands())
 
     def visitRepeat(self, ctx: xDroneParser.RepeatContext) -> None:
         expr = self.visit(ctx.expr())
@@ -364,7 +374,8 @@ class Compiler(xDroneParserVisitor):
         times = expr.value
 
         for _ in range(times):
-            self.visit(ctx.commands())
+            # scope - keep updates on existing variables, discard new variables
+            self._visit_commands_with_scope(ctx.commands())
 
     def visitReturn(self, ctx: xDroneParser.ReturnContext) -> None:
         if len(self.returned) == 1:
@@ -379,7 +390,7 @@ class Compiler(xDroneParserVisitor):
         for commands in ctx.commands():
             self.commands.append([])
 
-            # new scope
+            # scope - discard updates on existing variables, discard new variables
             new_symbol_table = copy.deepcopy(self._get_latest_symbol_table())
             self.symbol_table.append(new_symbol_table)
             self.returned.append(False)
