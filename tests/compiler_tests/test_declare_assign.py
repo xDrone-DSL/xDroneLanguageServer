@@ -114,6 +114,19 @@ class DeclareTest(unittest.TestCase):
 
         self.assertTrue("Identifier a already declared" in str(context.exception))
 
+    def test_repeated_declare_drone_constant_should_give_error(self):
+        types = [Type.int(), Type.decimal(), Type.string(), Type.boolean(), Type.vector(), Type.drone(),
+                 Type.list_of(Type.int()), Type.list_of(Type.list_of(Type.int()))]
+        for type in types:
+            with self.assertRaises(CompileError) as context:
+                generate_commands("""
+                    main () {{
+                     {} DRONE;
+                    }}
+                    """.format(type.type_name), drone_config_map={"DRONE": DefaultDroneConfig()})
+
+            self.assertTrue("Identifier DRONE already declared" in str(context.exception))
+
 
 class AssignIdentTest(unittest.TestCase):
     def test_assign_ident_int_should_update_symbol_table(self):
@@ -236,6 +249,16 @@ class AssignIdentTest(unittest.TestCase):
             """)
 
         self.assertTrue("Identifier a has not been declared" in str(context.exception))
+
+    def test_assign_drone_constant_should_give_error(self):
+        with self.assertRaises(CompileError) as context:
+            generate_commands("""
+                main () {
+                 DRONE1 <- DRONE1;
+                }
+            """, drone_config_map={"DRONE1": DefaultDroneConfig()})
+
+        self.assertTrue("Identifier DRONE1 is a drone constant, cannot be assigned" in str(context.exception))
 
     def test_declare_and_then_assign_with_different_type_should_give_error(self):
         types = ["int", "decimal", "string", "boolean", "vector", "drone", "list[int]", "list[decimal]",
@@ -575,6 +598,20 @@ class CombinedDeclareAssignTest(unittest.TestCase):
 
         self.assertTrue("Identifier a already declared" in str(context.exception))
 
+    def test_repeated_declare_and_assign_drone_constant_should_give_error(self):
+        types = [Type.int(), Type.decimal(), Type.string(), Type.boolean(), Type.vector(), Type.drone(),
+                 Type.list_of(Type.int()), Type.list_of(Type.list_of(Type.int()))]
+        for type in types:
+            with self.assertRaises(CompileError) as context:
+                generate_commands("""
+                    main () {{
+                     {} a;
+                     {} DRONE <- a;
+                    }}
+                    """.format(type.type_name, type.type_name), drone_config_map={"DRONE": DefaultDroneConfig()})
+
+            self.assertTrue("Identifier DRONE already declared" in str(context.exception))
+
     def test_declare_and_assign_with_different_type_should_give_error(self):
         types = [Type.int(), Type.decimal(), Type.string(), Type.boolean(), Type.vector(), Type.drone(),
                  Type.list_of(Type.int()), Type.list_of(Type.list_of(Type.int()))]
@@ -615,3 +652,13 @@ class DelTest(unittest.TestCase):
             """)
 
         self.assertTrue("Identifier a has not been declared" in str(context.exception))
+
+    def test_del_drone_constant_should_give_error(self):
+        with self.assertRaises(CompileError) as context:
+            generate_commands("""
+                main () {
+                 del DRONE1;
+                }
+            """, drone_config_map={"DRONE1": DefaultDroneConfig()})
+
+        self.assertTrue("Identifier DRONE1 is a drone constant, cannot be deleted" in str(context.exception))

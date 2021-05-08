@@ -406,6 +406,7 @@ class Compiler(xDroneParserVisitor):
 
     def visitIdent(self, ctx: xDroneParser.IdentContext) -> Identifier:
         ident = ctx.IDENT().getText()
+        # ident in symbol table will shadow drone constant
         if ident in self._get_latest_symbol_table():
             return Identifier(str(ident), self._get_latest_symbol_table().get_expression(ident))
         if ident in self.drones:

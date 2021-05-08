@@ -7,6 +7,7 @@ from xdrone.compiler.compiler_utils.symbol_table import SymbolTable
 from xdrone.compiler.compiler_utils.type import Type
 from xdrone.shared.command import Command, SingleDroneCommand
 from xdrone.shared.compile_error import CompileError
+from xdrone.shared.drone_config import DefaultDroneConfig
 
 
 class FunctionDefinitionTest(unittest.TestCase):
@@ -314,6 +315,22 @@ class ProcedureCallTest(unittest.TestCase):
                         .format(Expression(Type.int(), 1, ident=None))
                         in str(context.exception))
 
+    def test_call_procedure_with_parameter_should_shadow_constant(self):
+        commands = generate_commands("""
+            procedure proc(drone DRONE2) {
+              DRONE2.up(1);
+            }
+            main () {
+              DRONE1.takeoff();
+              proc(DRONE1);
+              DRONE1.land();
+            }
+            """, drone_config_map={"DRONE1": DefaultDroneConfig(), "DRONE2": DefaultDroneConfig()})
+        expected_commands = [SingleDroneCommand("DRONE1", Command.takeoff()),
+                             SingleDroneCommand("DRONE1", Command.up(1)),
+                             SingleDroneCommand("DRONE1", Command.land())]
+        self.assertEqual(expected_commands, commands)
+
 
 class FunctionCallTest(unittest.TestCase):
     def test_call_function_should_run_commands_and_return(self):
@@ -402,6 +419,24 @@ class FunctionCallTest(unittest.TestCase):
                 }
                 """)
         self.assertTrue("Function call should return an expression, but nothing is returned" in str(context.exception))
+
+    def test_call_function_with_parameter_should_shadow_constant(self):
+        commands = generate_commands("""
+            function func(drone DRONE2) return int {
+              DRONE2.up(1);
+              return 1;
+            }
+            main () {
+              DRONE1.takeoff();
+              DRONE1.up(func(DRONE1));
+              DRONE1.land();
+            }
+            """, drone_config_map={"DRONE1": DefaultDroneConfig(), "DRONE2": DefaultDroneConfig()})
+        expected_commands = [SingleDroneCommand("DRONE1", Command.takeoff()),
+                             SingleDroneCommand("DRONE1", Command.up(1)),
+                             SingleDroneCommand("DRONE1", Command.up(1)),
+                             SingleDroneCommand("DRONE1", Command.land())]
+        self.assertEqual(expected_commands, commands)
 
 
 class ComplexFunctionTest(unittest.TestCase):
