@@ -3,10 +3,12 @@ from __future__ import annotations
 import copy
 from typing import Union
 
+from xdrone.compiler.compiler_utils.drones import Drone, NullDrone
+
 
 class Type:
 
-    def __init__(self, type_name: str, default_value: Union[int, float, str, bool, list]):
+    def __init__(self, type_name: str, default_value: Union[int, float, str, bool, Drone, list]):
         self._type_name = type_name
         self._default_value = default_value
 
@@ -15,7 +17,7 @@ class Type:
         return copy.deepcopy(self._type_name)
 
     @property
-    def default_value(self) -> Union[int, float, str, bool, list]:
+    def default_value(self) -> Union[int, float, str, bool, Drone, list]:
         return copy.deepcopy(self._default_value)
 
     @staticmethod
@@ -37,6 +39,10 @@ class Type:
     @staticmethod
     def vector() -> Type:
         return Type("vector", [0, 0, 0])
+
+    @staticmethod
+    def drone() -> Type:
+        return Type("drone", NullDrone())
 
     @staticmethod
     def list_of(elem_type: Type) -> ListType:
@@ -78,5 +84,4 @@ class EmptyList(ListType):
         self._type_name = "list[]"
 
     def __eq__(self, other):
-        if isinstance(other, ListType):
-            return True
+        return isinstance(other, ListType)

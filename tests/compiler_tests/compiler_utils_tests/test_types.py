@@ -1,5 +1,6 @@
 import unittest
 
+from xdrone.compiler.compiler_utils.drones import NullDrone
 from xdrone.compiler.compiler_utils.type import Type, ListType, EmptyList
 
 
@@ -34,6 +35,12 @@ class TestTypes(unittest.TestCase):
         self.assertEqual([0, 0, 0], Type.vector().default_value)
         self.assertEqual("vector", str(Type.vector()))
 
+    def test_drone(self):
+        self.assertEqual(Type.drone(), Type.drone())
+        self.assertEqual("drone", Type.drone().type_name)
+        self.assertEqual(NullDrone(), Type.drone().default_value)
+        self.assertEqual("drone", str(Type.drone()))
+
     def test_list(self):
         list_type = Type.list_of(Type.int())
         self.assertEqual(Type.list_of(Type.int()), list_type)
@@ -62,10 +69,10 @@ class TestTypes(unittest.TestCase):
         self.assertEqual("list[]", str(empty_list))
 
     def test_eq(self):
-        types1 = [None, Type.int(), Type.decimal(), Type.string(), Type.boolean(), Type.vector(),
+        types1 = [None, Type.int(), Type.decimal(), Type.string(), Type.boolean(), Type.vector(), Type.drone(),
                   Type.list_of(Type.int()), Type.list_of(Type.decimal()),
                   Type.list_of(Type.list_of(Type.int())), Type.list_of(Type.list_of(Type.decimal()))]
-        types2 = [None, Type.int(), Type.decimal(), Type.string(), Type.boolean(), Type.vector(),
+        types2 = [None, Type.int(), Type.decimal(), Type.string(), Type.boolean(), Type.vector(), Type.drone(),
                   Type.list_of(Type.int()), Type.list_of(Type.decimal()),
                   Type.list_of(Type.list_of(Type.int())), Type.list_of(Type.list_of(Type.decimal()))]
         for i in range(len(types1)):

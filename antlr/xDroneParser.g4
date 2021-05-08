@@ -9,17 +9,17 @@ prog : func* MAIN L_PAR R_PAR L_BRACE commands R_BRACE ;
 commands : command* ;
 
 command
-  : (droneIdent DOT)? TAKEOFF L_PAR R_PAR SEMICOLON                                  #takeoff
-  | (droneIdent DOT)? LAND L_PAR R_PAR SEMICOLON                                     #land
-  | (droneIdent DOT)? UP L_PAR expr R_PAR SEMICOLON                                  #up
-  | (droneIdent DOT)? DOWN L_PAR expr R_PAR SEMICOLON                                #down
-  | (droneIdent DOT)? LEFT L_PAR expr R_PAR SEMICOLON                                #left
-  | (droneIdent DOT)? RIGHT L_PAR expr R_PAR SEMICOLON                               #right
-  | (droneIdent DOT)? FORWARD L_PAR expr R_PAR SEMICOLON                             #forward
-  | (droneIdent DOT)? BACKWARD L_PAR expr R_PAR SEMICOLON                            #backward
-  | (droneIdent DOT)? ROTATE_LEFT L_PAR expr R_PAR SEMICOLON                         #rotateLeft
-  | (droneIdent DOT)? ROTATE_RIGHT L_PAR expr R_PAR SEMICOLON                        #rotateRight
-  | (droneIdent DOT)? WAIT L_PAR expr R_PAR SEMICOLON                                #wait
+  : (expr DOT)? TAKEOFF L_PAR R_PAR SEMICOLON                                        #takeoff
+  | (expr DOT)? LAND L_PAR R_PAR SEMICOLON                                           #land
+  | (expr DOT)? UP L_PAR expr R_PAR SEMICOLON                                        #up
+  | (expr DOT)? DOWN L_PAR expr R_PAR SEMICOLON                                      #down
+  | (expr DOT)? LEFT L_PAR expr R_PAR SEMICOLON                                      #left
+  | (expr DOT)? RIGHT L_PAR expr R_PAR SEMICOLON                                     #right
+  | (expr DOT)? FORWARD L_PAR expr R_PAR SEMICOLON                                   #forward
+  | (expr DOT)? BACKWARD L_PAR expr R_PAR SEMICOLON                                  #backward
+  | (expr DOT)? ROTATE_LEFT L_PAR expr R_PAR SEMICOLON                               #rotateLeft
+  | (expr DOT)? ROTATE_RIGHT L_PAR expr R_PAR SEMICOLON                              #rotateRight
+  | (expr DOT)? WAIT L_PAR expr R_PAR SEMICOLON                                      #wait
   | type_ ident SEMICOLON                                                            #declare
   | type_ ident ARROW expr SEMICOLON                                                 #declareAssign
   | vectorElem ARROW expr SEMICOLON                                                  #assignVectorElem
@@ -36,8 +36,6 @@ command
   | RETURN (expr)? SEMICOLON                                                         #return
   | L_BRACE commands R_BRACE (PARALLEL L_BRACE commands R_BRACE)+ SEMICOLON          #parallel
   ;
-
-droneIdent : IDENT ;
 
 ident : IDENT ;
 
@@ -68,6 +66,7 @@ type_
   | TYPE_STRING                                #stringType
   | TYPE_BOOLEAN                               #booleanType
   | TYPE_VECTOR                                #vectorType
+  | TYPE_DRONE                                 #droneType
   | TYPE_LIST L_BRACKET type_ R_BRACKET        #listType
   ;
 

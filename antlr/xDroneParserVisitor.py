@@ -149,11 +149,6 @@ class xDroneParserVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by xDroneParser#droneIdent.
-    def visitDroneIdent(self, ctx:xDroneParser.DroneIdentContext):
-        return self.visitChildren(ctx)
-
-
     # Visit a parse tree produced by xDroneParser#ident.
     def visitIdent(self, ctx:xDroneParser.IdentContext):
         return self.visitChildren(ctx)
@@ -231,6 +226,11 @@ class xDroneParserVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by xDroneParser#vectorType.
     def visitVectorType(self, ctx:xDroneParser.VectorTypeContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by xDroneParser#droneType.
+    def visitDroneType(self, ctx:xDroneParser.DroneTypeContext):
         return self.visitChildren(ctx)
 
 

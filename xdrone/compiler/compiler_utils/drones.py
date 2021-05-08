@@ -1,18 +1,36 @@
 import copy
 
+from xdrone.shared.drone_config import DroneConfig, DefaultDroneConfig
 
-class DroneIdentifier:
-    def __init__(self, ident: str):
-        self._ident = ident
+
+class Drone:
+    def __init__(self, name: str, config: DroneConfig):
+        self._name = name
+        self._config = config
 
     @property
-    def ident(self) -> str:
-        return copy.deepcopy(self._ident)
+    def name(self) -> str:
+        return copy.deepcopy(self._name)
+
+    @property
+    def config(self) -> DroneConfig:
+        return copy.deepcopy(self._config)
 
     def __str__(self):
-        return "DroneIdentifier: {{ ident: {} }}".format(self._ident)
+        return "Drone: {{ name: {}, config: {} }}".format(self._name, self._config)
 
     def __eq__(self, other):
-        if isinstance(other, DroneIdentifier):
-            return other._ident == self._ident
+        if isinstance(other, Drone):
+            return other._name == self._name and other._config == self._config
         return False
+
+
+class NullDrone(Drone):
+    def __init__(self):
+        super().__init__("null", DefaultDroneConfig())
+
+    def __str__(self):
+        return "NullDrone: { }"
+
+    def __eq__(self, other):
+        return isinstance(other, NullDrone)

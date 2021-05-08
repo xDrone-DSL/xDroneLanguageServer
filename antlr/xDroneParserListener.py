@@ -260,15 +260,6 @@ class xDroneParserListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by xDroneParser#droneIdent.
-    def enterDroneIdent(self, ctx:xDroneParser.DroneIdentContext):
-        pass
-
-    # Exit a parse tree produced by xDroneParser#droneIdent.
-    def exitDroneIdent(self, ctx:xDroneParser.DroneIdentContext):
-        pass
-
-
     # Enter a parse tree produced by xDroneParser#ident.
     def enterIdent(self, ctx:xDroneParser.IdentContext):
         pass
@@ -410,6 +401,15 @@ class xDroneParserListener(ParseTreeListener):
 
     # Exit a parse tree produced by xDroneParser#vectorType.
     def exitVectorType(self, ctx:xDroneParser.VectorTypeContext):
+        pass
+
+
+    # Enter a parse tree produced by xDroneParser#droneType.
+    def enterDroneType(self, ctx:xDroneParser.DroneTypeContext):
+        pass
+
+    # Exit a parse tree produced by xDroneParser#droneType.
+    def exitDroneType(self, ctx:xDroneParser.DroneTypeContext):
         pass
 
 

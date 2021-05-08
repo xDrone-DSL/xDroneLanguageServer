@@ -40,6 +40,7 @@ TYPE_DECIMAL: 'decimal' ;
 TYPE_STRING: 'string' ;
 TYPE_BOOLEAN: 'boolean' ;
 TYPE_VECTOR: 'vector' ;
+TYPE_DRONE: 'drone' ;
 TYPE_LIST: 'list' ;
 
 TRUE: 'true' ;

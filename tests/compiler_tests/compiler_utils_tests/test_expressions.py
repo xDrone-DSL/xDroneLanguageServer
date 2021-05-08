@@ -1,7 +1,9 @@
 import unittest
 
+from xdrone.compiler.compiler_utils.drones import Drone
 from xdrone.compiler.compiler_utils.expressions import Expression, AbstractExpression, Identifier, ListElem, VectorElem
 from xdrone.compiler.compiler_utils.type import Type
+from xdrone.shared.drone_config import DefaultDroneConfig
 
 
 class TestAbstractExpression(unittest.TestCase):
@@ -20,6 +22,7 @@ class TestExpression(unittest.TestCase):
                        Expression(Type.int(), 1, "a"), Expression(Type.decimal(), 1.1, "a"),
                        Expression(Type.boolean(), False, "a"),
                        Expression(Type.vector(), [1.1, 2.2, -1.1], "a"),
+                       Expression(Type.drone(), Drone("drone", DefaultDroneConfig()), "a"),
                        Expression(Type.list_of(Type.int()), [1, 2, 3, 4], "a"),
                        Expression(Type.list_of(Type.int()), [], "a"),
                        Expression(Type.list_of(Type.decimal()), [1.0, 2.0, 3.0, 4.0], "a"),
@@ -37,6 +40,7 @@ class TestExpression(unittest.TestCase):
                         Expression(Type.int(), 1, "a"), Expression(Type.decimal(), 1.1, "a"),
                         Expression(Type.boolean(), False, "a"),
                         Expression(Type.vector(), [1.1, 2.2, -1.1], "a"),
+                        Expression(Type.drone(), Drone("drone", DefaultDroneConfig()), "a"),
                         Expression(Type.list_of(Type.int()), [1, 2, 3, 4], "a"),
                         Expression(Type.list_of(Type.int()), [], "a"),
                         Expression(Type.list_of(Type.decimal()), [1.0, 2.0, 3.0, 4.0], "a"),
@@ -50,6 +54,7 @@ class TestExpression(unittest.TestCase):
                         Expression(Type.int(), 1, "a"), Expression(Type.decimal(), 1.1, "a"),
                         Expression(Type.boolean(), False, "a"),
                         Expression(Type.vector(), [1.1, 2.2, -1.1], "a"),
+                        Expression(Type.drone(), Drone("drone", DefaultDroneConfig()), "a"),
                         Expression(Type.list_of(Type.int()), [1, 2, 3, 4], "a"),
                         Expression(Type.list_of(Type.int()), [], "a"),
                         Expression(Type.list_of(Type.decimal()), [1.0, 2.0, 3.0, 4.0], "a"),
@@ -83,6 +88,10 @@ class TestExpression(unittest.TestCase):
                          str(Expression(Type.boolean(), False, "a")))
         self.assertEqual("Expression: { type: vector, value: [1.1, 2.2, -1.1], ident: a }",
                          str(Expression(Type.vector(), [1.1, 2.2, -1.1], "a")))
+        self.assertEqual("Expression: { type: drone, value: Drone: { name: drone, config: DroneConfig: "
+                         "{ init_position: (0, 0, 0), speed_mps: 1, rotate_speed_dps: 90, takeoff_height_meters: 1 } "
+                         "}, ident: a }",
+                         str(Expression(Type.drone(), Drone("drone", DefaultDroneConfig()), "a")))
         self.assertEqual("Expression: { type: list[int], value: [1, 2, 3, 4], ident: a }",
                          str(Expression(Type.list_of(Type.int()), [1, 2, 3, 4], "a")))
         self.assertEqual("Expression: { type: list[int], value: [], ident: a }",
@@ -97,6 +106,7 @@ class TestIdentifier(unittest.TestCase):
         expressions = [None, Expression(Type.int(), 1, "a"), Expression(Type.decimal(), 1.1, "a"),
                        Expression(Type.boolean(), False, "a"),
                        Expression(Type.vector(), [1.1, 2.2, -1.1], "a"),
+                       Expression(Type.drone(), Drone("drone", DefaultDroneConfig()), "a"),
                        Expression(Type.list_of(Type.int()), [1, 2, 3, 4], "a"),
                        Expression(Type.list_of(Type.int()), [], "a"),
                        Expression(Type.list_of(Type.decimal()), [1.0, 2.0, 3.0, 4.0], "a"),
@@ -130,7 +140,8 @@ class TestListElem(unittest.TestCase):
     def test_container_not_list_should_give_error(self):
         none_list_exprs = [Expression(Type.int(), 1, "a"), Expression(Type.decimal(), 1.0, "a"),
                            Expression(Type.boolean(), True, "a"), Expression(Type.string(), "abc", "a"),
-                           Expression(Type.vector(), [1.0, 1.0, 1.0], "a")]
+                           Expression(Type.vector(), [1.0, 1.0, 1.0], "a"),
+                           Expression(Type.drone(), Drone("drone", DefaultDroneConfig()), "a")]
         for none_list_expr in none_list_exprs:
             with self.assertRaises(AssertionError) as context:
                 ListElem("a", none_list_expr, 0)
@@ -181,6 +192,7 @@ class TestVectorElem(unittest.TestCase):
     def test_container_not_vector_should_give_error(self):
         none_vector_exprs = [Expression(Type.int(), 1, "a"), Expression(Type.decimal(), 1.0, "a"),
                              Expression(Type.boolean(), True, "a"), Expression(Type.string(), "abc", "a"),
+                             Expression(Type.drone(), Drone("drone", DefaultDroneConfig()), "a"),
                              Expression(Type.list_of(Type.decimal()), [1.0, 1.0, 1.0], "a"),
                              Expression(Type.list_of(Type.list_of(Type.decimal())), [[1.0, 1.0, 1.0]], "a")]
         for none_vector_expr in none_vector_exprs:

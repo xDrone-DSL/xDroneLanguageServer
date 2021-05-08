@@ -1,6 +1,7 @@
 import copy
 from typing import Union
 
+from xdrone.compiler.compiler_utils.drones import Drone
 from xdrone.compiler.compiler_utils.expressions import Expression
 
 
@@ -27,7 +28,7 @@ class SymbolTable:
         assert not self.__contains__(ident), "Expression already in symbol table, please use update() to update it"
         self._symbol_table[ident] = expression
 
-    def update(self, ident: str, value: Union[int, float, str, bool, list]) -> None:
+    def update(self, ident: str, value: Union[int, float, str, bool, Drone, list]) -> None:
         assert self.__contains__(ident), "Expression not in symbol table, please use store() to store it first"
         old_expression = self._symbol_table[ident]
         self._symbol_table[ident] = Expression(old_expression.type, value, ident=ident)

@@ -3,6 +3,7 @@ from __future__ import annotations
 import copy
 from typing import Optional, Union
 
+from xdrone.compiler.compiler_utils.drones import Drone
 from xdrone.compiler.compiler_utils.type import ListType, Type
 
 
@@ -12,7 +13,7 @@ class AbstractExpression:
 
 
 class Expression(AbstractExpression):
-    def __init__(self, type: Type, value: Union[int, float, str, bool, list], ident: Optional[str] = None):
+    def __init__(self, type: Type, value: Union[int, float, str, bool, Drone, list], ident: Optional[str] = None):
         self._type = type
         self._value = value
         self._ident = ident
@@ -22,7 +23,7 @@ class Expression(AbstractExpression):
         return copy.deepcopy(self._type)
 
     @property
-    def value(self) -> Union[int, float, str, bool, list]:
+    def value(self) -> Union[int, float, str, bool, Drone, list]:
         return copy.deepcopy(self._value)
 
     @property
