@@ -38,7 +38,7 @@ class Type:
 
     @staticmethod
     def vector() -> Type:
-        return Type("vector", [0, 0, 0])
+        return Type("vector", [0.0, 0.0, 0.0])
 
     @staticmethod
     def drone() -> Type:

@@ -453,7 +453,7 @@ class ListRemoveTest(unittest.TestCase):
 
 
 class VectorTest(unittest.TestCase):
-    def test_vector_should_return_correct_value(self):
+    def test_vector_with_decimal_should_return_correct_value(self):
         actual = SymbolTable()
         generate_commands("""
             main () {
@@ -464,8 +464,19 @@ class VectorTest(unittest.TestCase):
         expected.store("a", Expression(Type.vector(), [1.0, 2.0, -3.0], ident="a"))
         self.assertEqual(expected, actual)
 
+    def test_vector_with_int_should_return_correct_value(self):
+        actual = SymbolTable()
+        generate_commands("""
+            main () {
+              vector a <- (1, 2.0, -3);
+            }
+            """, symbol_table=actual)
+        expected = SymbolTable()
+        expected.store("a", Expression(Type.vector(), [1.0, 2.0, -3.0], ident="a"))
+        self.assertEqual(expected, actual)
+
     def test_vector_with_wrong_type_should_give_error(self):
-        types = [Type.int(), Type.string(), Type.boolean(), Type.vector(), Type.drone(),
+        types = [Type.string(), Type.boolean(), Type.vector(), Type.drone(),
                  Type.list_of(Type.int()), Type.list_of(Type.decimal()), Type.list_of(Type.list_of(Type.int()))]
         for type in types:
             with self.assertRaises(CompileError) as context:
@@ -475,11 +486,11 @@ class VectorTest(unittest.TestCase):
                       vector b <- (a, 2.0, -3.0);
                     }}
                     """.format(type))
-            self.assertTrue("Expression {} should have type decimal, but is {}"
+            self.assertTrue("Expression {} should have type int or decimal, but is {}"
                             .format(Expression(type, type.default_value, ident="a"), type.type_name)
                             in str(context.exception))
 
-    def test_vector_elem_assign_should_update_symbol_table_correctly(self):
+    def test_vector_elem_assign_with_decimal_should_update_symbol_table_correctly(self):
         actual = SymbolTable()
         generate_commands("""
             main () {
@@ -491,6 +502,20 @@ class VectorTest(unittest.TestCase):
             """, symbol_table=actual)
         expected = SymbolTable()
         expected.store("a", Expression(Type.vector(), [1.1, 2.2, -3.3], ident="a"))
+        self.assertEqual(expected, actual)
+
+    def test_vector_elem_assign_with_int_should_update_symbol_table_correctly(self):
+        actual = SymbolTable()
+        generate_commands("""
+            main () {
+              vector a <- (10, 20, -30);
+              a.x <- 1;
+              a.y <- 2;
+              a.z <- -3;
+            }
+            """, symbol_table=actual)
+        expected = SymbolTable()
+        expected.store("a", Expression(Type.vector(), [1.0, 2.0, -3.0], ident="a"))
         self.assertEqual(expected, actual)
 
     def test_vector_elem_assign_with_wrong_ident_should_give_error(self):
@@ -514,17 +539,17 @@ class VectorTest(unittest.TestCase):
         actual = SymbolTable()
         generate_commands("""
             main () {
-              vector a <- (1.0, 2.0, 3.0);
+              vector a <- (1, -2, -3.0);
               decimal b <- a.x;
               decimal c <- a.y;
               decimal d <- a.z;
             }
             """, symbol_table=actual)
         expected = SymbolTable()
-        expected.store("a", Expression(Type.vector(), [1.0, 2.0, 3.0], ident="a"))
+        expected.store("a", Expression(Type.vector(), [1.0, -2.0, -3.0], ident="a"))
         expected.store("b", Expression(Type.decimal(), 1.0, ident="b"))
-        expected.store("c", Expression(Type.decimal(), 2.0, ident="c"))
-        expected.store("d", Expression(Type.decimal(), 3.0, ident="d"))
+        expected.store("c", Expression(Type.decimal(), -2.0, ident="c"))
+        expected.store("d", Expression(Type.decimal(), -3.0, ident="d"))
         self.assertEqual(expected, actual)
 
     def test_list_elem_expr_with_wrong_ident_should_give_error(self):

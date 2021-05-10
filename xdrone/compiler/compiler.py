@@ -233,9 +233,10 @@ class Compiler(xDroneParserVisitor):
         ident = vector_elem.ident
         vector = vector_elem.container
         index = vector_elem.index
-        if expr.type != Type.decimal():
-            raise CompileError("Assigned value {} should have type decimal, but is {}".format(expr, expr.type))
-        self._update_nested_ident(ident, expr, index)
+        if expr.type != Type.int() and expr.type != Type.decimal():
+            raise CompileError("Assigned value {} should have type int or decimal, but is {}".format(expr, expr.type))
+        decimal_expr = Expression(Type.decimal(), float(expr.value), ident=expr.ident)
+        self._update_nested_ident(ident, decimal_expr, index)
 
     def visitAssignListElem(self, ctx: xDroneParser.AssignListElemContext) -> None:
         list_elem, expr = self.visit(ctx.listElem()), self.visit(ctx.expr())
@@ -625,9 +626,9 @@ class Compiler(xDroneParserVisitor):
     def visitVector(self, ctx: xDroneParser.VectorContext) -> Expression:
         expr1, expr2, expr3 = self.visit(ctx.expr(0)), self.visit(ctx.expr(1)), self.visit(ctx.expr(2))
         for expr in [expr1, expr2, expr3]:
-            if expr.type != Type.decimal():
-                raise CompileError("Expression {} should have type decimal, but is {}".format(expr, expr.type))
-        return Expression(Type.vector(), [expr1.value, expr2.value, expr3.value])
+            if expr.type != Type.int() and expr.type != Type.decimal():
+                raise CompileError("Expression {} should have type int or decimal, but is {}".format(expr, expr.type))
+        return Expression(Type.vector(), [float(expr1.value), float(expr2.value), float(expr3.value)])
 
     def visitFunctionCall(self, ctx: xDroneParser.FunctionCallContext) -> Expression:
         call = self.visit(ctx.call())

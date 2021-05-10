@@ -305,17 +305,23 @@ class AssignVectorElemTest(unittest.TestCase):
         self.assertEqual(expected, actual)
 
     def test_assign_vector_elem_to_variable_should_update_symbol_table(self):
-        for index, vector in zip(["x", "y", "z"], [[-1.0, 0, 0], [0, -2.0, 0], [0, 0, -3.0]]):
-            actual = SymbolTable()
-            generate_commands("""
-                main () {{
-                 vector a;
-                 a.{} <- (-1.0, -2.0, -3.0).{};
-                }}
-                """.format(index, index), symbol_table=actual)
-            expected = SymbolTable()
-            expected.store("a", Expression(Type.vector(), vector, ident="a"))
-            self.assertEqual(expected, actual)
+        actual = SymbolTable()
+        generate_commands("""
+            main () {
+             vector a;
+             vector b;
+             a.x <- 1;
+             a.y <- 2;
+             a.z <- -2;
+             b.x <- 1.0;
+             b.y <- 2.0;
+             b.z <- -2.0;
+            }
+            """, symbol_table=actual)
+        expected = SymbolTable()
+        expected.store("a", Expression(Type.vector(), [1.0, 2.0, -2.0], ident="a"))
+        expected.store("b", Expression(Type.vector(), [1.0, 2.0, -2.0], ident="b"))
+        self.assertEqual(expected, actual)
 
     def test_assign_vector_elem_not_declared_variable_should_give_error(self):
         with self.assertRaises(CompileError) as context:
@@ -328,7 +334,7 @@ class AssignVectorElemTest(unittest.TestCase):
         self.assertTrue("Identifier a has not been declared" in str(context.exception))
 
     def test_declare_and_then_assign_vector_elem_with_different_type_should_give_error(self):
-        for type in [Type.int(), Type.string(), Type.boolean(), Type.vector(), Type.drone(),
+        for type in [Type.string(), Type.boolean(), Type.vector(), Type.drone(),
                      Type.list_of(Type.int()), Type.list_of(Type.list_of(Type.int()))]:
             for index in ["x", "y", "z"]:
                 with self.assertRaises(CompileError) as context:
@@ -340,7 +346,7 @@ class AssignVectorElemTest(unittest.TestCase):
                         }}
                     """.format(type.type_name, index))
 
-                self.assertTrue("Assigned value {} should have type decimal, but is {}"
+                self.assertTrue("Assigned value {} should have type int or decimal, but is {}"
                                 .format(Expression(type, type.default_value, ident="b"), type.type_name)
                                 in str(context.exception))
 
