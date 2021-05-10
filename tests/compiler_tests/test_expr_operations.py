@@ -1,6 +1,6 @@
 import unittest
 
-from xdrone import generate_commands
+from xdrone import generate_commands, DefaultDroneConfig
 from xdrone.compiler.compiler_utils.expressions import Expression
 from xdrone.compiler.compiler_utils.symbol_table import SymbolTable
 from xdrone.compiler.compiler_utils.type import Type
@@ -379,19 +379,22 @@ class ComparisonOperationTest(unittest.TestCase):
               boolean c <- [[1], [2]] == [[1], [2]];
               boolean d <- [] == [];
               boolean e <- "a" == "a";
-              boolean f <- 1 == 2;
-              boolean g <- 1.0 == 2.0;
-              boolean h <- true == false;
-              boolean i <- "a" == "b";
-              boolean j <- (5.0, 2.0, -3.0) == (1.0, 2.0, -3.0);
-              boolean k <- [5, 2] == [1, 2];
-              boolean l <- [[5], [2]] == [[1], [2]];
+              boolean f <- DRONE1 == DRONE1;
+              
+              boolean g <- 1 == 2;
+              boolean h <- 1.0 == 2.0;
+              boolean i <- true == false;
+              boolean j <- "a" == "b";
+              boolean k <- (5.0, 2.0, -3.0) == (1.0, 2.0, -3.0);
+              boolean l <- [5, 2] == [1, 2];
+              boolean n <- [[5], [2]] == [[1], [2]];
+              boolean m <- DRONE1 == DRONE2;
             }
-            """, symbol_table=actual)
+            """, drone_config_map={"DRONE1": DefaultDroneConfig(), "DRONE2": DefaultDroneConfig()}, symbol_table=actual)
         expected = SymbolTable()
-        for i in "abcde":
+        for i in "abcdef":
             expected.store(i, Expression(Type.boolean(), True, ident=i))
-        for i in "fghijkl":
+        for i in "ghijklnm":
             expected.store(i, Expression(Type.boolean(), False, ident=i))
         self.assertEqual(expected, actual)
 
@@ -437,19 +440,22 @@ class ComparisonOperationTest(unittest.TestCase):
               boolean c <- [[1], [2]] =/= [[1], [2]];
               boolean d <- [] =/= [];
               boolean e <- "a" =/= "a";
-              boolean f <- 1 =/= 2;
-              boolean g <- 1.0 =/= 2.0;
-              boolean h <- true =/= false;
-              boolean i <- "a" =/= "b";
-              boolean j <- (5.0, 2.0, -3.0) =/= (1.0, 2.0, -3.0);
-              boolean k <- [5, 2] =/= [1, 2];
-              boolean l <- [[5], [2]] =/= [[1], [2]];
+              boolean f <- DRONE1 =/= DRONE1;
+              
+              boolean g <- 1 =/= 2;
+              boolean h <- 1.0 =/= 2.0;
+              boolean i <- true =/= false;
+              boolean j <- "a" =/= "b";
+              boolean k <- (5.0, 2.0, -3.0) =/= (1.0, 2.0, -3.0);
+              boolean l <- [5, 2] =/= [1, 2];
+              boolean n <- [[5], [2]] =/= [[1], [2]];
+              boolean m <- DRONE1 =/= DRONE2;
             }
-            """, symbol_table=actual)
+            """, drone_config_map={"DRONE1": DefaultDroneConfig(), "DRONE2": DefaultDroneConfig()}, symbol_table=actual)
         expected = SymbolTable()
-        for i in "abcde":
+        for i in "abcdef":
             expected.store(i, Expression(Type.boolean(), False, ident=i))
-        for i in "fghijkl":
+        for i in "ghijklnm":
             expected.store(i, Expression(Type.boolean(), True, ident=i))
         self.assertEqual(expected, actual)
 
