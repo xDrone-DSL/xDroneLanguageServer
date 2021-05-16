@@ -2,17 +2,19 @@ import json
 from logging import warning
 from typing import Dict
 
+from xdrone.shared.collision_config import CollisionConfig, DefaultCollisionConfig
 from xdrone.shared.drone_config import DroneConfig, DefaultDroneConfig
 from xdrone.shared.safety_config import SafetyConfig
 
 
 class ConfigParser:
     @staticmethod
-    def parse(json_str: str) -> (Dict[str, DroneConfig], SafetyConfig):
+    def parse(json_str: str) -> (Dict[str, DroneConfig], SafetyConfig, CollisionConfig):
         data = json.loads(json_str)
         drone_config_map = ConfigParser._parse_drone_config(data)
         safety_config = ConfigParser._parse_safety_config(data)
-        return drone_config_map, safety_config
+        collision_config = ConfigParser._parse_collision_config(data)
+        return drone_config_map, safety_config, collision_config
 
     @staticmethod
     def _parse_drone_config(data: dict) -> Dict[str, DroneConfig]:
@@ -128,9 +130,30 @@ class ConfigParser:
                         "There will be no limit on 'min_z_meters'.")
                 min_z_meters = float('-inf')
             safety_config = SafetyConfig(max_seconds, max_x_meters, max_y_meters, max_z_meters,
-                                         min_x_meters, min_y_meters, min_z_meters, )
+                                         min_x_meters, min_y_meters, min_z_meters)
         else:
             warning("'safety_config' missing when parsing configs, using unlimited safety_config. " +
                     "Time and position will be unlimited.")
             safety_config = SafetyConfig.no_limit()
         return safety_config
+
+    @staticmethod
+    def _parse_collision_config(data: dict) -> CollisionConfig:
+        if "collision_config" in data:
+            if "collision_meters" in data["collision_config"]:
+                collision_meters = data["collision_config"]["collision_meters"]
+            else:
+                warning("'collision_meters' missing when parsing 'collision_config', using default value 0. " +
+                        "There will be no limit on 'collision_meters'.")
+                collision_meters = 0.0
+            if "time_interval_seconds" in data["collision_config"]:
+                collision_time_interval_seconds = data["collision_config"]["time_interval_seconds"]
+            else:
+                warning("'time_interval_seconds' missing when parsing 'collision_config', " +
+                        "using default value 0.1.")
+                collision_time_interval_seconds = 0.1
+            collision_config = CollisionConfig(collision_meters, collision_time_interval_seconds)
+        else:
+            warning("'collision_config' missing when parsing configs, using default collision_config.")
+            collision_config = DefaultCollisionConfig()
+        return collision_config
