@@ -18,14 +18,16 @@ from xdrone.command_converters.simulation_converter import SimulationConverter
 @click.option('--config', type=click.Path(), help='The configuration json of your drone and flight environment.')
 @click.option('--timeout', default=5, type=click.INT, help='Timeout of compilation.')
 @click.option('--port', default=8080, type=click.INT, help='Port on localhost where the simulator server is running.')
-def xdrone(function, code, config, timeout, port):
+@click.option('--no-check', is_flag=True)
+def xdrone(function, code, config, timeout, port, no_check):
     with open(code, mode='r') as file:
         program = file.read()
     with open(config, mode='r') as file:
         config = file.read()
 
+    has_checks = not no_check
     queue = multiprocessing.Queue()
-    _run_with_timeout(_validate, (program, config, queue), timeout,
+    _run_with_timeout(_validate, (program, config, has_checks, queue), timeout,
                       "Timed out. Please check whether your code contains an infinite loop. " +
                       "Your can change the timeout time by adding the '--timeout' tag.")
     if queue.empty():
@@ -47,10 +49,12 @@ def _run_with_timeout(target, args, timeout, timeout_msg="Timeout"):
         p.join()
 
 
-def _validate(program, config, queue):
+def _validate(program, config, has_checks, queue):
     print("Validating your program...")
+    if not has_checks:
+        print("Skipping safety checks... only syntax will be checked")
     try:
-        drone_commands, drone_config_map, _ = generate_commands_with_config(program, config)
+        drone_commands, drone_config_map, _ = generate_commands_with_config(program, config, has_checks)
         print("Your program is valid.")
         queue.put((drone_commands, drone_config_map))
     except Exception as e:
