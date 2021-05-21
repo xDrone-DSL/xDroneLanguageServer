@@ -6,7 +6,7 @@ import webbrowser
 import click
 
 from xdrone import generate_commands_with_config
-from xdrone.command_converters.dji_tello_drone_executor import DJITelloExecutor
+from xdrone.command_converters.dji_tello_edu_drone_executor import DJITelloEduExecutor
 from xdrone.command_converters.simulation_converter import SimulationConverter
 
 
@@ -81,8 +81,9 @@ def _is_port_in_use(port):
 
 def _fly(drone_commands):
     print("Start to fly your drone...")
-    # TODO the following is for one drone only
-    DJITelloExecutor().execute_commands(drone_commands)
+    # TODO: find better approach to import name_id_map
+    name_id_map = {"DRONE1": "0TQDG19EDB26V6", "DRONE2": "0TQDG19EDBNC96"}
+    DJITelloEduExecutor(name_id_map).execute_drone_commands(drone_commands)
 
 
 if __name__ == '__main__':
