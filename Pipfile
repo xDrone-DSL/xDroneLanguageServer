@@ -9,12 +9,10 @@ pylint = "*"
 autopep8 = "*"
 
 [packages]
-lark-parser = "*"
-pyparrot = "*"
-zeroconf = "*"
-untangle = "*"
-flask = "*"
-flask-cors = "*"
+click = "*"
+antlr4-python3-runtime = "*"
+netifaces = "*"
+netaddr = "*"
 
 [requires]
 python_version = "3.7"
