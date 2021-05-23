@@ -20,10 +20,19 @@ from xdrone.command_converters.simulation_converter import SimulationConverter
 @click.option('--port', default=8080, type=click.INT, help='Port on localhost where the simulator server is running.')
 @click.option('--no-check', is_flag=True)
 def xdrone(function, code, config, timeout, port, no_check):
+    if code is None:
+        code = click.prompt("Please enter path to your code", type=click.Path())
+    if config is None:
+        config = click.prompt("Please enter path to your configuration", type=click.Path())
     with open(code, mode='r') as file:
         program = file.read()
     with open(config, mode='r') as file:
         config = file.read()
+
+    if no_check:
+        if not click.confirm("Safety checks will be skipped, are you sure?"):
+            print("Aborted.")
+            return
 
     has_checks = not no_check
     queue = multiprocessing.Queue()
@@ -36,7 +45,7 @@ def xdrone(function, code, config, timeout, port, no_check):
     if function == "simulate":
         _simulate(drone_commands, drone_config_map, port)
     if function == "fly":
-        _fly(drone_commands)
+        _fly(drone_commands, drone_config_map)
 
 
 def _run_with_timeout(target, args, timeout, timeout_msg="Timeout"):
@@ -79,10 +88,14 @@ def _is_port_in_use(port):
         return s.connect_ex(('localhost', port)) == 0
 
 
-def _fly(drone_commands):
+def _fly(drone_commands, drone_config_map):
+    # {"DRONE1": "0TQDG19EDB26V6", "DRONE2": "0TQDG19EDBNC96"}
+    name_id_map = {}
+    for name in drone_config_map.keys():
+        id = click.prompt("Enter your Tello EDU drone id for \"{}\"".format(name), type=click.STRING)
+        name_id_map[name] = id
+
     print("Start to fly your drone...")
-    # TODO: find better approach to import name_id_map
-    name_id_map = {"DRONE1": "0TQDG19EDB26V6", "DRONE2": "0TQDG19EDBNC96"}
     DJITelloEduExecutor(name_id_map).execute_drone_commands(drone_commands)
 
 
