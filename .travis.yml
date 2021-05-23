@@ -18,14 +18,6 @@ jobs:
     - stage: test
       skip_cleanup: true
       script: pipenv run; pytest
-    - stage: deploy
-      script: docker build -t xdronedsl/backend:latest .
-      deploy:
-        provider: script
-        skip_cleanup: true
-        script: bash docker_push.sh
-        on:
-          branch: master
 
 notifications:
   email: false
