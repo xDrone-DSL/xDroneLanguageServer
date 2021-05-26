@@ -1,15 +1,15 @@
 from typing import List, Dict, Set
 
+from xdrone.shared.boundary_config import BoundaryConfig
 from xdrone.shared.command import AbstractDroneCommand, SingleDroneCommand, ParallelDroneCommands
 from xdrone.shared.safety_check_error import SafetyCheckError
-from xdrone.shared.safety_config import SafetyConfig
 from xdrone.shared.state import State
 from xdrone.state_updaters.state_updater import StateUpdater
 
 
-class SafetyChecker:
-    def __init__(self, safety_config: SafetyConfig):
-        self.safety_config = safety_config
+class BoundaryChecker:
+    def __init__(self, boundary_config: BoundaryConfig):
+        self.boundary_config = boundary_config
 
     def check(self, drone_commands: List[AbstractDroneCommand], state_updater_map: Dict[str, StateUpdater]):
         drone_state_map = {name: state_updater.get_init_state() for name, state_updater in state_updater_map.items()}
@@ -46,7 +46,7 @@ class SafetyChecker:
         time_used = self._update_states(single_drone_command, state_updaters, drone_state_map, drones_involved)
         for name, state in drone_state_map.items():
             try:
-                self.safety_config.check_state(name, state)
+                self.boundary_config.check_state(name, state)
             except SafetyCheckError as e:
                 raise SafetyCheckError("When running command '{}', boundary limits are violated: {}"
                                        .format(single_drone_command.to_command_str(), str(e)))
@@ -100,7 +100,7 @@ class SafetyChecker:
 
         for name, state in drone_state_map.items():
             try:
-                self.safety_config.check_state(name, state)
+                self.boundary_config.check_state(name, state)
             except SafetyCheckError as e:
                 raise SafetyCheckError("When running command '{}', boundary limits are violated: {}"
                                        .format(parallel_drone_commands.to_command_str(), str(e)))

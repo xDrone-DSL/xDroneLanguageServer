@@ -500,7 +500,7 @@ class MovementGetDroneNameTest(unittest.TestCase):
         with self.assertRaises(CompileError) as context:
             generate_commands("""
                 main() { drone d; d.takeoff(); d.land(); }
-            """, )
+            """)
         self.assertTrue("Drone has not been assigned"
                         in str(context.exception))
 

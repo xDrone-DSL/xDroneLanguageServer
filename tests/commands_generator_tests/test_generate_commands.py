@@ -1,12 +1,12 @@
 import unittest
 
 from xdrone import generate_commands
-from xdrone.safety_checker.safety_checker import SafetyChecker
+from xdrone.safety_checker.boundary_checker import BoundaryChecker
+from xdrone.shared.boundary_config import BoundaryConfig
 from xdrone.shared.command import Command, SingleDroneCommand
 from xdrone.shared.compile_error import CompileError, XDroneSyntaxError
 from xdrone.shared.drone_config import DroneConfig
 from xdrone.shared.safety_check_error import SafetyCheckError
-from xdrone.shared.safety_config import SafetyConfig
 
 
 class GenerateCommandsTest(unittest.TestCase):
@@ -36,26 +36,26 @@ class GenerateCommandsTest(unittest.TestCase):
 
     def test_if_not_given_state_updater_should_use_default_to_update_state(self):
         commands = "main() {takeoff(); land();}"
-        generate_commands(commands, safety_checker=SafetyChecker(SafetyConfig(max_seconds=10, max_z_meters=1)))
+        generate_commands(commands, boundary_checker=BoundaryChecker(BoundaryConfig(max_seconds=10, max_z_meters=1)))
 
     def test_if_given_state_updater_should_use_it_to_update_state(self):
         commands = "main() {takeoff(); land();}"
         with self.assertRaises(SafetyCheckError) as context:
-            generate_commands(commands,
-                              drone_config_map={"DEFAULT": DroneConfig(init_position=(0, 0, 0),
-                                                                       speed_mps=1, rotate_speed_dps=90,
-                                                                       takeoff_height_meters=10)},
-                              safety_checker=SafetyChecker(SafetyConfig(max_seconds=10, max_z_meters=1)))
+            generate_commands(commands, drone_config_map={"DEFAULT": DroneConfig(init_position=(0, 0, 0),
+                                                                                 speed_mps=1, rotate_speed_dps=90,
+                                                                                 takeoff_height_meters=10)},
+                              boundary_checker=BoundaryChecker(BoundaryConfig(max_seconds=10, max_z_meters=1)))
         self.assertTrue("Drone 'DEFAULT': the z coordinate 10 will go beyond its upper limit 1"
                         in str(context.exception))
 
-    def test_if_not_given_safety_checker_should_use_default_to_check_safety(self):
+    def test_if_not_given_boundary_checker_should_use_default_to_check_safety(self):
         commands = "main() {takeoff(); wait(1000); up(1000); land();}"
         generate_commands(commands)
 
-    def test_if_given_safety_checker_should_use_it_to_check_safety(self):
+    def test_if_given_boundary_checker_should_use_it_to_check_safety(self):
         commands = "main() {takeoff(); up(1000); land();}"
         with self.assertRaises(SafetyCheckError) as context:
-            generate_commands(commands, safety_checker=SafetyChecker(SafetyConfig(max_seconds=10000, max_z_meters=1)))
+            generate_commands(commands,
+                              boundary_checker=BoundaryChecker(BoundaryConfig(max_seconds=10000, max_z_meters=1)))
         self.assertTrue("Drone 'DEFAULT': the z coordinate 1001 will go beyond its upper limit 1"
                         in str(context.exception))
