@@ -67,5 +67,5 @@ def generate_commands_with_config(program, config_json, has_checks):
     drone_config_map, boundary_config, collision_config = ConfigParser.parse(config_json)
     boundary_checker = BoundaryChecker(boundary_config)
     collision_checker = CollisionChecker(drone_config_map, collision_config)
-    return (generate_commands(program, drone_config_map, boundary_checker, collision_checker, has_checks),
-            drone_config_map, boundary_config)
+    generated_commands = generate_commands(program, drone_config_map, boundary_checker, collision_checker, has_checks)
+    return generated_commands, drone_config_map, boundary_config
