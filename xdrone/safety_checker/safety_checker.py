@@ -45,7 +45,11 @@ class SafetyChecker:
         self._check_takeoff_state(single_drone_command, drone_state_map)
         time_used = self._update_states(single_drone_command, state_updaters, drone_state_map, drones_involved)
         for name, state in drone_state_map.items():
-            self.safety_config.check_state(name, state)
+            try:
+                self.safety_config.check_state(name, state)
+            except SafetyCheckError as e:
+                raise SafetyCheckError("When running command '{}', boundary limits are violated: {}"
+                                       .format(single_drone_command.to_command_str(), str(e)))
         return time_used
 
     def _check_takeoff_state(self, single_drone_command: SingleDroneCommand, drone_state_map: Dict[str, State]):
@@ -95,7 +99,11 @@ class SafetyChecker:
                                                                            drones_involved)
 
         for name, state in drone_state_map.items():
-            self.safety_config.check_state(name, state)
+            try:
+                self.safety_config.check_state(name, state)
+            except SafetyCheckError as e:
+                raise SafetyCheckError("When running command '{}', boundary limits are violated: {}"
+                                       .format(parallel_drone_commands.to_command_str(), str(e)))
         return longest_time_used
 
     def _update_states_and_check_for_each_branch(self, parallel_drone_commands: ParallelDroneCommands,

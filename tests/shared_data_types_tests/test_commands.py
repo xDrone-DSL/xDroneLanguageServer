@@ -107,6 +107,10 @@ class TestAbstractDroneCommands(unittest.TestCase):
         with self.assertRaises(NotImplementedError) as context:
             AbstractDroneCommand().get_drones_involved()
 
+    def test_to_command_str(self):
+        with self.assertRaises(NotImplementedError) as context:
+            AbstractDroneCommand().to_command_str()
+
 
 class TestSingleDroneCommand(unittest.TestCase):
 
@@ -118,6 +122,12 @@ class TestSingleDroneCommand(unittest.TestCase):
     def test_get_drones_involved(self):
         drone_command = SingleDroneCommand("abc", Command.takeoff())
         self.assertEqual({"abc"}, drone_command.get_drones_involved())
+
+    def test_to_command_str(self):
+        drone_command = SingleDroneCommand("abc", Command.takeoff())
+        self.assertEqual("abc.takeoff();", drone_command.to_command_str())
+        drone_command = SingleDroneCommand("abc", Command.up(1))
+        self.assertEqual("abc.up(1);", drone_command.to_command_str())
 
     def test_str(self):
         drone_command = SingleDroneCommand("abc", Command.takeoff())
@@ -201,6 +211,19 @@ class TestParallelCommands(unittest.TestCase):
                 [SingleDroneCommand("DRONE1", Command.takeoff())]
             ])
         self.assertTrue({"DRONE1"}, context.exception.repeated_names)
+
+    def test_to_command_str(self):
+        parallel_commands = ParallelDroneCommands()
+        parallel_commands.add([])
+        parallel_commands.add([SingleDroneCommand("abc", Command.takeoff()),
+                               SingleDroneCommand("abc", Command.up(1))])
+        self.assertEqual("{ } || { abc.takeoff(); abc.up(1); };",
+                         parallel_commands.to_command_str())
+        outer_parallel_commands = ParallelDroneCommands()
+        outer_parallel_commands.add([])
+        outer_parallel_commands.add([parallel_commands])
+        self.assertEqual("{ } || { { } || { abc.takeoff(); abc.up(1); }; };",
+                         outer_parallel_commands.to_command_str())
 
     def test_str(self):
         parallel_commands = ParallelDroneCommands()

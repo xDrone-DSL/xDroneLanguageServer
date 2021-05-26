@@ -74,6 +74,9 @@ class AbstractDroneCommand:
     def get_drones_involved(self) -> Set[str]:
         raise NotImplementedError("get_drones_involved not supported in AbstractDroneCommand")
 
+    def to_command_str(self) -> str:
+        raise NotImplementedError("to_command_str not supported in AbstractDroneCommand")
+
 
 class SingleDroneCommand(AbstractDroneCommand):
     def __init__(self, drone_name: str, command: Command):
@@ -90,6 +93,11 @@ class SingleDroneCommand(AbstractDroneCommand):
 
     def get_drones_involved(self) -> Set[str]:
         return {self.drone_name}
+
+    def to_command_str(self) -> str:
+        return "{}.{}{};".format(self._drone_name,
+                                 self._command.opcode,
+                                 str(self._command.operands).replace("[", "(").replace("]", ")"))
 
     def __str__(self):
         return "SingleDroneCommand: {{ drone_name: {}, command: {} }}".format(self._drone_name, self._command)
@@ -139,6 +147,14 @@ class ParallelDroneCommands(AbstractDroneCommand):
             raise RepeatDroneNameException(repeated_names)
         self._branches.append(drone_commands)
         self._drones_involved_each_branch.append(drones_to_be_involved)
+
+    def to_command_str(self) -> str:
+        result = "{ "
+        for i, commands in enumerate(self._branches):
+            for command in commands:
+                result += command.to_command_str() + " "
+            result += "} || { " if i < len(self._branches) - 1 else "};"
+        return result
 
     def __str__(self):
         result = "ParallelDroneCommands: { "
