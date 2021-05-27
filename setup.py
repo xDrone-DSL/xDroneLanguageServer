@@ -6,10 +6,10 @@ with open("README.md") as readme:
 # This call to setup() does all the work
 setup(
     name="xdrone",
-    version="0.1.7",
+    version="0.1.8",
     description="xDrone Language Server",
-    # long_description=long_description,
-    # long_description_content_type="text/markdown",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
     url="https://github.com/xDrone-DSL/xDroneLanguageServer",
     author="Kai Zhu",
     license="MIT",

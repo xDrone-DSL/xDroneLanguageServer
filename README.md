@@ -1,31 +1,27 @@
-# Setup
 
-To run it in Docker:
+This project is available on [Github](https://github.com/xDrone-DSL/xDroneLanguageServer) and [Pypi](https://pypi.org/project/xdrone/).
 
-1. `docker build -t xdronedsl/backend .` 
+### To Use
+Run `pip install xdrone` for to install the xdrone package.
 
-2. `docker run -it xdronedsl/backend`  
+Then run 
+```
+xdrone [--validate | --simulate | --fly] --code <code_path> --config <config_path>
+```
+to validate the code, simulate in the simulator, or fly real drones.
 
-To run it without Docker:  
-1. Make sure you're using python 3
-If `pip --version` mentions python 2, then use `pip3` instead of `pip` and `python3` instead of `python` in the commands below.
+Note that to run the simulation, [xDroneWebSimulator](https://github.com/xDrone-DSL/xDroneWebSimulator) must be running on the localhost.
 
-    {Tip: 
-    Add `alias python=python3` and `alias pip=pip3`in `~/.bashrc`, and run `source ~/.bashrc` 
+Run
+```
+xdrone --help
+```
+for more information.
 
-    OSX: `source ~/.bashrc` will (probably) not be run after rebooting, so add `source ~/.bashrc` to `~/.profile`
-          (Source: http://archive.is/Q0EUC) }
+### To Develop
+Clone the Github repo for the source code.
 
-
-2. Install pipenv
-`pip install --user pipenv`
-
-3. Enter the pipenv environment
-In this directory run:
-`pipenv shell`
-
-(If this doesnt work, try: `sudo apt install pipenv`or `brew install pipenv`first, and then try again)
-
-4. Install the env dependencies `pipenv install --dev`
-
-5. To run the server run `python server.py`
+The terminal commands are similar as before, but with `xdrone` replace by `python cmdline.py`, e.g.
+```
+python cmdline.py --help
+```
