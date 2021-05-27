@@ -18,7 +18,7 @@ from xdrone.command_converters.simulation_converter import SimulationConverter
 @click.option('--config', type=click.Path(), help='The configuration json of your drone and flight environment.')
 @click.option('--timeout', default=5, type=click.INT, help='Timeout of compilation.')
 @click.option('--port', default=8080, type=click.INT, help='Port on localhost where the simulator server is running.')
-@click.option('--no-check', is_flag=True)
+@click.option('--no-check', is_flag=True, help='No safety check will be performed.')
 def xdrone(function, code, config, timeout, port, no_check):
     if code is None:
         code = click.prompt("Please enter path to your code", type=click.Path())
