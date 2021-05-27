@@ -25,3 +25,6 @@ The terminal commands are similar as before, but with `xdrone` replace by `pytho
 ```
 python cmdline.py --help
 ```
+
+### Language Spec
+Please read [xDrone Spec](https://github.com/xDrone-DSL/xDroneLanguageServer/blob/master/docs/xDrone-spec.pdf).
