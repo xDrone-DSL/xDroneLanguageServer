@@ -98,7 +98,9 @@ def _fly(drone_commands, drone_config_map):
     print("Start to fly your drone...")
     DJITelloEduExecutor(name_id_map).execute_drone_commands(drone_commands)
 
-
-if __name__ == '__main__':
+def main():
     logging.basicConfig(level=logging.INFO)
     xdrone(standalone_mode=False)
+
+if __name__ == '__main__':
+    main()
