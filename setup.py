@@ -6,7 +6,7 @@ with open("README.md") as readme:
 # This call to setup() does all the work
 setup(
     name="xdrone",
-    version="0.1.6",
+    version="0.1.7",
     description="xDrone Language Server",
     # long_description=long_description,
     # long_description_content_type="text/markdown",
@@ -20,10 +20,11 @@ setup(
     ],
     packages=find_packages(),
     include_package_data=True,
+    scripts=['./cmdline.py'],
     install_requires=["click", "antlr4-python3-runtime", "netifaces", "netaddr"],
     entry_points={
         "console_scripts": [
-            "xdrone=cmdline.xdrone:main",
+            "xdrone=cmdline:main",
         ]
     },
 )
