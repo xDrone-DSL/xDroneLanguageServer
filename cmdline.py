@@ -24,6 +24,7 @@ def xdrone(function, code, config, timeout, port, no_check):
         code = click.prompt("Please enter path to your code", type=click.Path())
     if config is None:
         config = click.prompt("Please enter path to your configuration", type=click.Path())
+
     with open(code, mode='r') as file:
         program = file.read()
     with open(config, mode='r') as file:
@@ -101,7 +102,11 @@ def _fly(drone_commands, drone_config_map):
 
 def main():
     logging.basicConfig(level=logging.INFO)
-    xdrone(standalone_mode=False)
+    try:
+        xdrone(standalone_mode=False)
+    except Exception as e:
+        print("Aborted. Error: {}".format(str(e)))
+        return
 
 
 if __name__ == '__main__':

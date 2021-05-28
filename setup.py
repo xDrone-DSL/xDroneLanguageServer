@@ -6,7 +6,7 @@ with open("README.md") as readme:
 # This call to setup() does all the work
 setup(
     name="xdrone",
-    version="0.1.10",
+    version="0.1.11",
     description="xDrone Language Server",
     long_description=long_description,
     long_description_content_type="text/markdown",
