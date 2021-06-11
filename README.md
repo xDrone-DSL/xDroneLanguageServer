@@ -21,9 +21,9 @@ for more information.
 ### To Develop
 Clone the Github repo for the source code.
 
-The terminal commands are similar as before, but with `xdrone` replace by `python cmdline.py`, e.g.
+The terminal commands are similar as before, but with `xdrone` replace by `python -m cmdline.xdrone`, e.g.
 ```
-python cmdline.py --help
+python -m cmdline.xdrone --help
 ```
 
 ### Language Spec

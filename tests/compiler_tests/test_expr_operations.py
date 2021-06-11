@@ -1,10 +1,11 @@
 import unittest
 
-from xdrone import generate_commands, DefaultDroneConfig
+from xdrone.command_generators import generate_commands
 from xdrone.compiler.compiler_utils.expressions import Expression
 from xdrone.compiler.compiler_utils.symbol_table import SymbolTable
 from xdrone.compiler.compiler_utils.type import Type
 from xdrone.shared.compile_error import CompileError
+from xdrone.shared.drone_config import DefaultDroneConfig
 
 
 class EscapedStringTest(unittest.TestCase):

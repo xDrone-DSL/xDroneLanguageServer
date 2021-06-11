@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import patch, Mock
 
-from xdrone import generate_commands, generate_commands_with_config
+from xdrone.command_generators import generate_commands, generate_commands_with_config
 from xdrone.safety_checker.boundary_checker import BoundaryChecker
 from xdrone.shared.boundary_config import BoundaryConfig
 from xdrone.shared.command import Command, SingleDroneCommand
@@ -64,18 +64,24 @@ class GenerateCommandsTest(unittest.TestCase):
 
 class GenerateCommandsWithConfig(unittest.TestCase):
 
-    def test_generate_commands_with_config(self):
+    @patch('xdrone.command_generators.ConfigParser.parse')
+    @patch('xdrone.command_generators.generate_commands')
+    @patch('xdrone.command_generators.CollisionChecker')
+    @patch('xdrone.command_generators.BoundaryChecker')
+    def test_generate_commands_with_config(self, mock_boundary_checker, mock_collision_checker,
+                                           mock_generate_commands, mock_parse):
         program, config_json, has_checks, save_check_log = Mock(), Mock(), Mock(), Mock()
         drone_config_map, boundary_config, collision_config = Mock(), Mock(), Mock()
         boundary_checker = Mock()
         collision_checker = Mock()
         generated_commands = Mock()
-        with patch('xdrone.ConfigParser.parse', return_value=(drone_config_map, boundary_config, collision_config)):
-            with patch('xdrone.generate_commands', return_value=generated_commands) as generate_commands:
-                with patch('xdrone.BoundaryChecker', return_value=boundary_checker):
-                    with patch('xdrone.CollisionChecker', return_value=collision_checker):
-                        self.assertEqual((generated_commands, drone_config_map, boundary_config),
-                                         generate_commands_with_config(program, config_json,
-                                                                       has_checks, save_check_log))
-                        generate_commands.assert_called_with(program, drone_config_map, boundary_checker,
-                                                             collision_checker, has_checks, save_check_log)
+        mock_parse.return_value = (drone_config_map, boundary_config, collision_config)
+        mock_generate_commands.return_value = generated_commands
+        mock_collision_checker.return_value = collision_checker
+        mock_boundary_checker.return_value = boundary_checker
+
+        self.assertEqual((generated_commands, drone_config_map, boundary_config),
+                         generate_commands_with_config(program, config_json, has_checks, save_check_log))
+
+        mock_generate_commands.assert_called_with(program, drone_config_map, boundary_checker,
+                                                  collision_checker, has_checks, save_check_log)

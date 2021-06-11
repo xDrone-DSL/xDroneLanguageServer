@@ -5,7 +5,7 @@ import webbrowser
 
 import click
 
-from xdrone import generate_commands_with_config
+from xdrone.command_generators import generate_commands_with_config
 from xdrone.command_converters.dji_tello_edu_drone_executor import DJITelloEduExecutor
 from xdrone.command_converters.simulation_converter import SimulationConverter
 

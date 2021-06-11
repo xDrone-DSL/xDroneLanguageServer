@@ -1,6 +1,6 @@
 import unittest
 
-from xdrone import generate_commands
+from xdrone.command_generators import generate_commands
 from xdrone.compiler.compiler_utils.expressions import Expression
 from xdrone.compiler.compiler_utils.symbol_table import SymbolTable
 from xdrone.compiler.compiler_utils.type import Type

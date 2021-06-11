@@ -1,7 +1,7 @@
 import unittest
 
-from xdrone import DefaultDroneConfig, DroneConfig
 from xdrone.compiler.compiler_utils.drones import Drone, NullDrone
+from xdrone.shared.drone_config import DefaultDroneConfig, DroneConfig
 
 
 class TestDrone(unittest.TestCase):
