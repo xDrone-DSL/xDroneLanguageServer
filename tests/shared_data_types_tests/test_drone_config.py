@@ -21,17 +21,33 @@ class DroneConfigTest(unittest.TestCase):
                             rotate_speed_dps=45, takeoff_height_meters=invalid_value)
             self.assertTrue("takeoff_height_meters should > 0" in str(context.exception))
 
+        for invalid_value in [-10, -1]:
+            with self.assertRaises(ValueError) as context:
+                DroneConfig(init_position=(0, 0, 0), speed_mps=0.5,
+                            rotate_speed_dps=45, takeoff_height_meters=1, var_per_meter=invalid_value)
+            self.assertTrue("var_per_meter should >= 0" in str(context.exception))
+
+            with self.assertRaises(ValueError) as context:
+                DroneConfig(init_position=(0, 0, 0), speed_mps=0.5,
+                            rotate_speed_dps=45, takeoff_height_meters=1, var_per_degree=invalid_value)
+            self.assertTrue("var_per_degree should >= 0" in str(context.exception))
+
     def test_property(self):
-        drone_config = DroneConfig(init_position=(0, 0, 0), speed_mps=0.5, rotate_speed_dps=45, takeoff_height_meters=1)
+        drone_config = DroneConfig(init_position=(0, 0, 0), speed_mps=0.5, rotate_speed_dps=45, takeoff_height_meters=1,
+                                   var_per_degree=1.0, var_per_meter=0.1)
         self.assertEqual((0, 0, 0), drone_config.init_position)
         self.assertEqual(0.5, drone_config.speed_mps)
         self.assertEqual(45, drone_config.rotate_speed_dps)
         self.assertEqual(1, drone_config.takeoff_height_meters)
+        self.assertEqual(1.0, drone_config.var_per_degree)
+        self.assertEqual(0.1, drone_config.var_per_meter)
 
     def test_str(self):
-        drone_config = DroneConfig(init_position=(0, 0, 0), speed_mps=0.5, rotate_speed_dps=45, takeoff_height_meters=1)
+        drone_config = DroneConfig(init_position=(0, 0, 0), speed_mps=0.5, rotate_speed_dps=45,
+                                   takeoff_height_meters=1, var_per_meter=1.0, var_per_degree=0.1)
         self.assertEqual("DroneConfig: { init_position: (0, 0, 0), speed_mps: 0.5, " +
-                         "rotate_speed_dps: 45, takeoff_height_meters: 1 }",
+                         "rotate_speed_dps: 45, takeoff_height_meters: 1, " +
+                         "var_per_meter: 1.0, var_per_degree: 0.1 }",
                          str(drone_config))
 
     def test_eq(self):
@@ -55,6 +71,14 @@ class DroneConfigTest(unittest.TestCase):
                                         rotate_speed_dps=45, takeoff_height_meters=1),
                             DroneConfig(init_position=(0, 0, 0), speed_mps=0.5,
                                         rotate_speed_dps=45, takeoff_height_meters=2))
+        self.assertNotEqual(DroneConfig(init_position=(0, 0, 0), speed_mps=0.5,
+                                        rotate_speed_dps=45, takeoff_height_meters=1, var_per_meter=1.0),
+                            DroneConfig(init_position=(0, 0, 0), speed_mps=0.5,
+                                        rotate_speed_dps=45, takeoff_height_meters=1, var_per_meter=2.0))
+        self.assertNotEqual(DroneConfig(init_position=(0, 0, 0), speed_mps=0.5,
+                                        rotate_speed_dps=45, takeoff_height_meters=1, var_per_degree=1.0),
+                            DroneConfig(init_position=(0, 0, 0), speed_mps=0.5,
+                                        rotate_speed_dps=45, takeoff_height_meters=1, var_per_degree=2.0))
         self.assertNotEqual(None,
                             DroneConfig(init_position=(0, 0, 0), speed_mps=0.5, rotate_speed_dps=45,
                                         takeoff_height_meters=2))
@@ -66,3 +90,5 @@ class DefaultDroneConfigTest(unittest.TestCase):
         self.assertEqual(1, drone_config.speed_mps)
         self.assertEqual(90, drone_config.rotate_speed_dps)
         self.assertEqual(1, drone_config.takeoff_height_meters)
+        self.assertEqual(0.0, drone_config.var_per_meter)
+        self.assertEqual(0.0, drone_config.var_per_degree)

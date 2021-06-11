@@ -10,8 +10,8 @@ class TestDrone(unittest.TestCase):
         self.assertEqual(DefaultDroneConfig(), Drone("a", DefaultDroneConfig()).config)
 
     def test_str(self):
-        self.assertEqual("Drone: { name: a, config: DroneConfig: { init_position: (0, 0, 0), speed_mps: 1, " +
-                         "rotate_speed_dps: 90, takeoff_height_meters: 1 } }", str(Drone("a", DefaultDroneConfig())))
+        self.assertEqual("Drone: {{ name: a, config: {} }}".format(DefaultDroneConfig())
+                         , str(Drone("a", DefaultDroneConfig())))
 
     def test_eq(self):
         self.assertEqual(Drone("a", DefaultDroneConfig()), Drone("a", DefaultDroneConfig()))

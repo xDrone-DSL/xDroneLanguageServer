@@ -76,7 +76,17 @@ class ConfigParser:
                             "Position estimation may be inaccurate.")
                     takeoff_height_meters = 1
 
-                drone_config = DroneConfig(init_position, speed_mps, rotate_speed_dps, takeoff_height_meters)
+                # no warning given if fields in advanced missing
+                var_per_meter = 0.0
+                if "advanced" in drone:
+                    if "variance_per_meter" in drone["advanced"]:
+                        var_per_meter = drone["advanced"]["variance_per_meter"]
+
+                # TODO: variance in position when rotation is confused, better to change to variance in orientation
+                variance_per_degree = 0.0
+
+                drone_config = DroneConfig(init_position, speed_mps, rotate_speed_dps, takeoff_height_meters,
+                                           var_per_meter, variance_per_degree)
                 drone_config_map[name] = drone_config
         else:
             warning("'drones' missing when parsing configs, using default drone_config. " +
@@ -152,7 +162,13 @@ class ConfigParser:
                 warning("'time_interval_seconds' missing when parsing 'collision_config', " +
                         "using default value 0.1.")
                 collision_time_interval_seconds = 0.1
-            collision_config = CollisionConfig(collision_meters, collision_time_interval_seconds)
+            if "confidence_threshold" in data["collision_config"]:
+                confidence_threshold = data["collision_config"]["confidence_threshold"]
+            else:
+                warning("'confidence_threshold' missing when parsing 'collision_config', " +
+                        "using default value 1.0.")
+                confidence_threshold = 1.0
+            collision_config = CollisionConfig(collision_meters, collision_time_interval_seconds, confidence_threshold)
         else:
             warning("'collision_config' missing when parsing configs, using default collision_config.")
             collision_config = DefaultCollisionConfig()

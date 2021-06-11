@@ -34,7 +34,78 @@ class CollisionCheckerTest(unittest.TestCase):
                           SingleDroneCommand("DRONE1", Command.land())]
         with self.assertRaises(SafetyCheckError) as context:
             collision_checker.check(drone_commands, self.state_updater_map)
-        self.assertTrue("Error occurred during collision check, please retry with better the collision_config."
+        self.assertTrue("Error occurred during collision check, please retry with a better collision_config."
+                        in str(context.exception))
+
+    def test_check_with_large_variance_should_perform_not_like_determined(self):
+        collision_config = CollisionConfig(collision_meters=0.3, time_interval_seconds=0.1, confidence_threshold=0.95)
+        drone_config_map = {"DRONE1": DroneConfig(init_position=(0, 0, 0), speed_mps=1,
+                                                  rotate_speed_dps=90, takeoff_height_meters=1,
+                                                  var_per_meter=100),
+                            "DRONE2": DroneConfig(init_position=(1, 0, 0), speed_mps=2,
+                                                  rotate_speed_dps=180, takeoff_height_meters=1,
+                                                  var_per_meter=100)}
+        collision_checker = CollisionChecker(drone_config_map, collision_config)
+
+        drone_commands = [SingleDroneCommand("DRONE1", Command.takeoff()),
+                          SingleDroneCommand("DRONE2", Command.takeoff()),
+                          SingleDroneCommand("DRONE1", Command.right(1)),
+                          SingleDroneCommand("DRONE1", Command.left(1)),
+                          SingleDroneCommand("DRONE1", Command.land()),
+                          SingleDroneCommand("DRONE2", Command.land())]
+
+        collision_checker.check(drone_commands, self.state_updater_map)
+
+    def test_check_with_small_variance_should_perform_similar_to_determined(self):
+        collision_config = CollisionConfig(collision_meters=0.3, time_interval_seconds=0.1, confidence_threshold=0.99)
+        drone_config_map = {"DRONE1": DroneConfig(init_position=(0, 0, 0), speed_mps=1,
+                                                  rotate_speed_dps=90, takeoff_height_meters=1,
+                                                  var_per_meter=0.001),
+                            "DRONE2": DroneConfig(init_position=(1, 0, 0), speed_mps=2,
+                                                  rotate_speed_dps=180, takeoff_height_meters=1,
+                                                  var_per_meter=0.001)}
+        collision_checker = CollisionChecker(drone_config_map, collision_config)
+
+        drone_commands = [SingleDroneCommand("DRONE1", Command.takeoff()),
+                          SingleDroneCommand("DRONE2", Command.takeoff()),
+                          SingleDroneCommand("DRONE1", Command.right(1)),
+                          SingleDroneCommand("DRONE1", Command.left(1)),
+                          SingleDroneCommand("DRONE1", Command.land()),
+                          SingleDroneCommand("DRONE2", Command.land())]
+
+        with self.assertRaises(SafetyCheckError) as context:
+            collision_checker.check(drone_commands, self.state_updater_map)
+        self.assertTrue("Collision might happen between DRONE1 and DRONE2, at time 2.4s, " +
+                        "near position (x=0.95m, y=0.0m, z=1.0m), distance=0.1m, confidence=99.968%"
+                        in str(context.exception))
+        self.assertTrue("Collision might happen between DRONE1 and DRONE2, at time 2.6s, " +
+                        "near position (x=0.95m, y=0.0m, z=1.0m), distance=0.1m, confidence=99.949%"
+                        in str(context.exception))
+
+    def test_check_with_zero_variance_should_perform_as_determined(self):
+        collision_config = CollisionConfig(collision_meters=0.3, time_interval_seconds=0.1, confidence_threshold=1.0)
+        drone_config_map = {"DRONE1": DroneConfig(init_position=(0, 0, 0), speed_mps=1,
+                                                  rotate_speed_dps=90, takeoff_height_meters=1,
+                                                  var_per_meter=0),
+                            "DRONE2": DroneConfig(init_position=(1, 0, 0), speed_mps=2,
+                                                  rotate_speed_dps=180, takeoff_height_meters=1,
+                                                  var_per_meter=0)}
+        collision_checker = CollisionChecker(drone_config_map, collision_config)
+
+        drone_commands = [SingleDroneCommand("DRONE1", Command.takeoff()),
+                          SingleDroneCommand("DRONE2", Command.takeoff()),
+                          SingleDroneCommand("DRONE1", Command.right(1)),
+                          SingleDroneCommand("DRONE1", Command.left(1)),
+                          SingleDroneCommand("DRONE1", Command.land()),
+                          SingleDroneCommand("DRONE2", Command.land())]
+
+        with self.assertRaises(SafetyCheckError) as context:
+            collision_checker.check(drone_commands, self.state_updater_map)
+        self.assertTrue("Collision might happen between DRONE1 and DRONE2, at time 2.2s, " +
+                        "near position (x=0.85m, y=0.0m, z=1.0m), distance=0.3m, confidence=100.0%"
+                        in str(context.exception))
+        self.assertTrue("Collision might happen between DRONE1 and DRONE2, at time 2.8s, " +
+                        "near position (x=0.85m, y=0.0m, z=1.0m), distance=0.3m, confidence=100.0%"
                         in str(context.exception))
 
     def test_check_single_drone_command_should_detect_collision_and_give_error(self):

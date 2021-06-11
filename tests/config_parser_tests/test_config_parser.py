@@ -16,13 +16,19 @@ class ConfigParserTest(unittest.TestCase):
                 "init_position": {"x": 1, "y": 2, "z": 3},
                 "speed_mps": 2,
                 "rotate_speed_dps": 180,
-                "takeoff_height_meters": 2
+                "takeoff_height_meters": 2,
+                "advanced": {
+                  "variance_per_meter": 0.002
+                }
               },{
                 "name": "DRONE2",
                 "init_position": {"x": 4, "y": 5, "z": 6},
                 "speed_mps": 1,
                 "rotate_speed_dps": 90,
-                "takeoff_height_meters": 1
+                "takeoff_height_meters": 1,
+                "advanced": {
+                  "variance_per_meter": 0.001
+                }
               }],
               "boundary_config": {
                 "max_seconds": 100,
@@ -35,18 +41,22 @@ class ConfigParserTest(unittest.TestCase):
               },
               "collision_config": {
                 "collision_meters": 0.3,
-                "time_interval_seconds": 0.5
+                "time_interval_seconds": 0.5,
+                "confidence_threshold": 0.9
               }
             }
             """
         actual_drone_config, actual_boundary_config, acutal_collision_config = ConfigParser.parse(config)
         expected_drone_configs = {"DRONE1": DroneConfig(init_position=(1, 2, 3), speed_mps=2,
-                                                        rotate_speed_dps=180, takeoff_height_meters=2),
+                                                        rotate_speed_dps=180, takeoff_height_meters=2,
+                                                        var_per_meter=0.002),
                                   "DRONE2": DroneConfig(init_position=(4, 5, 6), speed_mps=1,
-                                                        rotate_speed_dps=90, takeoff_height_meters=1)}
+                                                        rotate_speed_dps=90, takeoff_height_meters=1,
+                                                        var_per_meter=0.001)}
         expected_boundary_config = BoundaryConfig(max_seconds=100, max_x_meters=10, max_y_meters=20, max_z_meters=30,
                                                   min_x_meters=-10, min_y_meters=-20, min_z_meters=-30)
-        expected_collision_config = CollisionConfig(collision_meters=0.3, time_interval_seconds=0.5)
+        expected_collision_config = CollisionConfig(collision_meters=0.3, time_interval_seconds=0.5,
+                                                    confidence_threshold=0.9)
         self.assertEqual(expected_drone_configs, actual_drone_config)
         self.assertEqual(expected_boundary_config, actual_boundary_config)
         self.assertEqual(expected_collision_config, acutal_collision_config)
@@ -96,7 +106,9 @@ class ConfigParserTest(unittest.TestCase):
                         "WARNING:root:'collision_meters' missing when parsing 'collision_config', " +
                         "using default value 0. There will be no limit on 'collision_meters'.",
                         "WARNING:root:'time_interval_seconds' missing when parsing 'collision_config', " +
-                        "using default value 0.1."]
+                        "using default value 0.1.",
+                        "WARNING:root:'confidence_threshold' missing when parsing 'collision_config', " +
+                        "using default value 1.0."]
         self.assertEqual(expected_log, log.output)
         expected_drone_configs = {"DEFAULT": DefaultDroneConfig()}
         expected_boundary_config = BoundaryConfig(max_seconds=float("inf"), max_x_meters=float("inf"),
@@ -123,7 +135,8 @@ class ConfigParserTest(unittest.TestCase):
               },
               "collision_config": {
                 "collision_meters": 0.3,
-                "time_interval_seconds": 0.5
+                "time_interval_seconds": 0.5,
+                "confidence_threshold": 0.9
               }
             }
             """
@@ -143,7 +156,8 @@ class ConfigParserTest(unittest.TestCase):
                                                          rotate_speed_dps=90, takeoff_height_meters=1)}
         expected_boundary_config = BoundaryConfig(max_seconds=100, max_x_meters=10, max_y_meters=20, max_z_meters=30,
                                                   min_x_meters=-10, min_y_meters=-20, min_z_meters=-30)
-        expected_collision_config = CollisionConfig(collision_meters=0.3, time_interval_seconds=0.5)
+        expected_collision_config = CollisionConfig(collision_meters=0.3, time_interval_seconds=0.5,
+                                                    confidence_threshold=0.9)
         self.assertEqual(expected_drone_configs, actual_drone_configs)
         self.assertEqual(expected_boundary_config, actual_boundary_config)
         self.assertEqual(expected_collision_config, actual_collision_config)
@@ -169,7 +183,8 @@ class ConfigParserTest(unittest.TestCase):
               },
               "collision_config": {
                 "collision_meters": 0.3,
-                "time_interval_seconds": 0.5
+                "time_interval_seconds": 0.5,
+                "confidence_threshold": 0.9
               }
             }
             """
@@ -187,7 +202,8 @@ class ConfigParserTest(unittest.TestCase):
                                                         rotate_speed_dps=180, takeoff_height_meters=2)}
         expected_boundary_config = BoundaryConfig(max_seconds=100, max_x_meters=10, max_y_meters=20, max_z_meters=30,
                                                   min_x_meters=-10, min_y_meters=-20, min_z_meters=-30)
-        expected_collision_config = CollisionConfig(collision_meters=0.3, time_interval_seconds=0.5)
+        expected_collision_config = CollisionConfig(collision_meters=0.3, time_interval_seconds=0.5,
+                                                    confidence_threshold=0.9)
         self.assertEqual(expected_drone_configs, actual_drone_configs)
         self.assertEqual(expected_boundary_config, actual_boundary_config)
         self.assertEqual(expected_collision_config, actual_collision_config)
@@ -213,7 +229,8 @@ class ConfigParserTest(unittest.TestCase):
               },
               "collision_config": {
                 "collision_meters": 0.3,
-                "time_interval_seconds": 0.5
+                "time_interval_seconds": 0.5,
+                "confidence_threshold": 0.9
               }
             }
             """
@@ -226,7 +243,8 @@ class ConfigParserTest(unittest.TestCase):
                                                          rotate_speed_dps=180, takeoff_height_meters=2)}
         expected_boundary_config = BoundaryConfig(max_seconds=100, max_x_meters=10, max_y_meters=20, max_z_meters=30,
                                                   min_x_meters=-10, min_y_meters=-20, min_z_meters=-30)
-        expected_collision_config = CollisionConfig(collision_meters=0.3, time_interval_seconds=0.5)
+        expected_collision_config = CollisionConfig(collision_meters=0.3, time_interval_seconds=0.5,
+                                                    confidence_threshold=0.9)
         self.assertEqual(expected_drone_configs, actual_drone_configs)
         self.assertEqual(expected_boundary_config, actual_boundary_config)
         self.assertEqual(expected_collision_config, actual_collision_config)
@@ -258,7 +276,8 @@ class ConfigParserTest(unittest.TestCase):
               },
               "collision_config": {
                 "collision_meters": 0.3,
-                "time_interval_seconds": 0.5
+                "time_interval_seconds": 0.5,
+                "confidence_threshold": 0.9
               }
             }
             """
@@ -271,7 +290,8 @@ class ConfigParserTest(unittest.TestCase):
                                                         rotate_speed_dps=180, takeoff_height_meters=2)}
         expected_boundary_config = BoundaryConfig(max_seconds=100, max_x_meters=10, max_y_meters=20, max_z_meters=30,
                                                   min_x_meters=-10, min_y_meters=-20, min_z_meters=-30)
-        expected_collision_config = CollisionConfig(collision_meters=0.3, time_interval_seconds=0.5)
+        expected_collision_config = CollisionConfig(collision_meters=0.3, time_interval_seconds=0.5,
+                                                    confidence_threshold=0.9)
         self.assertEqual(expected_drone_configs, actual_drone_configs)
         self.assertEqual(expected_boundary_config, actual_boundary_config)
         self.assertEqual(expected_collision_config, actual_collision_config)

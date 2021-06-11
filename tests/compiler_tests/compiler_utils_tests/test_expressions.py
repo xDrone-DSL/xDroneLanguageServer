@@ -88,9 +88,8 @@ class TestExpression(unittest.TestCase):
                          str(Expression(Type.boolean(), False, "a")))
         self.assertEqual("Expression: { type: vector, value: [1.1, 2.2, -1.1], ident: a }",
                          str(Expression(Type.vector(), [1.1, 2.2, -1.1], "a")))
-        self.assertEqual("Expression: { type: drone, value: Drone: { name: DRONE, config: DroneConfig: "
-                         "{ init_position: (0, 0, 0), speed_mps: 1, rotate_speed_dps: 90, takeoff_height_meters: 1 } "
-                         "}, ident: a }",
+        self.assertEqual("Expression: {{ type: drone, value: {}, ident: a }}"
+                         .format(Drone("DRONE", DefaultDroneConfig())),
                          str(Expression(Type.drone(), Drone("DRONE", DefaultDroneConfig()), "a")))
         self.assertEqual("Expression: { type: list[int], value: [1, 2, 3, 4], ident: a }",
                          str(Expression(Type.list_of(Type.int()), [1, 2, 3, 4], "a")))

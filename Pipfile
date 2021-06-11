@@ -10,10 +10,12 @@ autopep8 = "*"
 coverage = "*"
 
 [packages]
+scipy = "*"
 click = "*"
 antlr4-python3-runtime = "*"
 netifaces = "*"
 netaddr = "*"
+matplotlib = "*"
 
 [requires]
 python_version = "3.7"
