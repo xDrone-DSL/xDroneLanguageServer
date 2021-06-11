@@ -65,7 +65,7 @@ class GenerateCommandsTest(unittest.TestCase):
 class GenerateCommandsWithConfig(unittest.TestCase):
 
     def test_generate_commands_with_config(self):
-        program, config_json, has_checks = Mock(), Mock(), Mock()
+        program, config_json, has_checks, save_check_log = Mock(), Mock(), Mock(), Mock()
         drone_config_map, boundary_config, collision_config = Mock(), Mock(), Mock()
         boundary_checker = Mock()
         collision_checker = Mock()
@@ -75,6 +75,7 @@ class GenerateCommandsWithConfig(unittest.TestCase):
                 with patch('xdrone.BoundaryChecker', return_value=boundary_checker):
                     with patch('xdrone.CollisionChecker', return_value=collision_checker):
                         self.assertEqual((generated_commands, drone_config_map, boundary_config),
-                                         generate_commands_with_config(program, config_json, has_checks))
+                                         generate_commands_with_config(program, config_json,
+                                                                       has_checks, save_check_log))
                         generate_commands.assert_called_with(program, drone_config_map, boundary_checker,
-                                                             collision_checker, has_checks)
+                                                             collision_checker, has_checks, save_check_log)

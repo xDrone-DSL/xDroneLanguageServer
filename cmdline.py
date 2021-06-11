@@ -16,10 +16,11 @@ from xdrone.command_converters.simulation_converter import SimulationConverter
 @click.option('--fly', 'function', flag_value='fly', help='Fly the drone.')
 @click.option('--code', type=click.Path(), help='The file contains your code.')
 @click.option('--config', type=click.Path(), help='The configuration json of your drone and flight environment.')
-@click.option('--timeout', default=5, type=click.INT, help='Timeout of compilation.')
+@click.option('--timeout', default=10, type=click.INT, help='Timeout of compilation.')
 @click.option('--port', default=8080, type=click.INT, help='Port on localhost where the simulator server is running.')
 @click.option('--no-check', is_flag=True, help='No safety check will be performed.')
-def xdrone(function, code, config, timeout, port, no_check):
+@click.option('--save-check-log', is_flag=True, help='Save the log of the collision check.')
+def xdrone(function, code, config, timeout, port, no_check, save_check_log):
     if code is None:
         code = click.prompt("Please enter path to your code", type=click.Path())
     if config is None:
@@ -37,7 +38,7 @@ def xdrone(function, code, config, timeout, port, no_check):
 
     has_checks = not no_check
     queue = multiprocessing.Queue()
-    _run_with_timeout(_validate, (program, config, has_checks, queue), timeout,
+    _run_with_timeout(_validate, (program, config, has_checks, save_check_log, queue), timeout,
                       "Timed out. Please check whether your code contains an infinite loop. " +
                       "Your can change the timeout time by adding the '--timeout' tag.")
     if queue.empty():
@@ -59,12 +60,14 @@ def _run_with_timeout(target, args, timeout, timeout_msg="Timeout"):
         p.join()
 
 
-def _validate(program, config, has_checks, queue):
+def _validate(program, config, has_checks, save_check_log, queue):
     print("Validating your program...")
     if not has_checks:
         print("Skipping safety checks... only syntax will be checked")
+    if save_check_log:
+        print("Logs will be saved at directory ./logs/")
     try:
-        drone_commands, drone_config_map, _ = generate_commands_with_config(program, config, has_checks)
+        drone_commands, drone_config_map, _ = generate_commands_with_config(program, config, has_checks, save_check_log)
         print("Your program is valid.")
         queue.put((drone_commands, drone_config_map))
     except Exception as e:

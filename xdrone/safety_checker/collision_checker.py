@@ -3,9 +3,13 @@ from __future__ import annotations
 import copy
 import itertools
 import math
-from scipy.stats import ncx2
+import os
 from itertools import combinations
-from typing import List, Dict, Set
+from typing import List, Dict, Set, Tuple
+
+import matplotlib.pyplot as plt
+from scipy.stats import ncx2
+from tabulate import tabulate
 
 from xdrone.shared.collision_config import CollisionConfig
 from xdrone.shared.command import AbstractDroneCommand, SingleDroneCommand, ParallelDroneCommands, Command
@@ -34,7 +38,9 @@ class CollisionChecker:
         self.drone_config_map = drone_config_map
         self.collision_config = collision_config
 
-    def check(self, drone_commands: List[AbstractDroneCommand], state_updater_map: Dict[str, StateUpdater]):
+    def check(self, drone_commands: List[AbstractDroneCommand],
+              state_updater_map: Dict[str, StateUpdater],
+              save_check_log: bool = False):
         if len(self.drone_config_map) == 1:
             # no need to check if there is only 1 drone
             return
@@ -47,10 +53,16 @@ class CollisionChecker:
         except Exception as e:
             raise SafetyCheckError("Error occurred during collision check, "
                                    "please retry with a better collision_config. Error: " + str(e))
-        self._check_distance(drone_trajectory_map)
 
-    def _check_distance(self, drone_trajectory_map):
+        collisions, time_slice_info = self._get_possible_collisions_and_time_slice_info(drone_trajectory_map)
+        if save_check_log:
+            CollisionLogSaver.save_check_log(time_slice_info)
+        self._check_collisions(collisions)
+
+    def _get_possible_collisions_and_time_slice_info(self, drone_trajectory_map: Dict[str, List[StateVariance]]) \
+            -> (List[Tuple], List[Tuple]):
         time = 0
+        time_slice_info = []
         collisions = []
         drone_trajectories = dict(drone_trajectory_map)
         while any(drone_trajectories.values()):
@@ -96,9 +108,10 @@ class CollisionChecker:
                     if confidence >= self.collision_config.confidence_threshold - 1e-5:
                         collisions.append((name1, name2, state1, state2, mean_distance, confidence))
 
-                    # print("{}-{}, time {:.2f}s, distance={:.2f}m, confidence={:.3f}%"
-                    #       .format(name1, name2, time, mean_distance, confidence * 100))
+                    time_slice_info.append((name1, name2, time, mean_distance, confidence))
+        return collisions, time_slice_info
 
+    def _check_collisions(self, collisions: List[Tuple[str, str, State, State, float, float]]):
         if collisions:
             error_msg = "Collisions might happen!\n"
             for name1, name2, state1, state2, mean_distance, confidence in collisions:
@@ -301,3 +314,40 @@ class CollisionChecker:
                                                          drone_trajectory_map,
                                                          drones_involved={name})
         return longest_time_used
+
+
+class CollisionLogSaver:
+    @staticmethod
+    def save_check_log(time_slice_info: List[Tuple[str, str, float, float, float]]):
+        log_dir = "logs"
+        if not os.path.isdir(log_dir):
+            os.mkdir(log_dir)
+
+        file_name = os.path.join(log_dir, "collision check log (all drones).txt")
+
+        with open(file_name, "w") as file:
+            sorted_time_slice_info = sorted(time_slice_info, key=lambda elem: elem[2])
+            file.write(tabulate(sorted_time_slice_info,
+                                headers=["Drone 1", "Drone 2", "Time", "Distance", "Confidence"]))
+
+        drone_pairs = sorted(set([(name1, name2) for (name1, name2, _, _, _) in time_slice_info]))
+
+        for drone_pair in drone_pairs:
+            filtered_time_slice_info = filter(lambda elem: drone_pair == (elem[0], elem[1]), time_slice_info)
+            filtered_time_slice_info = sorted(filtered_time_slice_info, key=lambda elem: elem[2])
+
+            file_name = os.path.join(log_dir, "collision check log ({}-{}).txt".format(drone_pair[0], drone_pair[1]))
+            with open(file_name, "w") as file:
+                file.write(tabulate(filtered_time_slice_info,
+                                    headers=["Drone 1", "Drone 2", "Time", "Distance", "Confidence"]))
+
+            times = [time for (_, _, time, _, _) in filtered_time_slice_info]
+            probabilities = [prob for (_, _, _, _, prob) in filtered_time_slice_info]
+            fig, ax = plt.subplots()
+            ax.plot(times, probabilities)
+            ax.set_xlabel("Time")
+            ax.set_ylabel("Probability")
+            ax.set_title("Probability of Collision between {} and {}".format(drone_pair[0], drone_pair[1]))
+            ax.set_ylim([-0.05, 1.05])
+            fig_name = os.path.join(log_dir, "collision probability ({}-{}).png".format(drone_pair[0], drone_pair[1]))
+            fig.savefig(fig_name)

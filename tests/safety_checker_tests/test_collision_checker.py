@@ -1,4 +1,5 @@
 import unittest
+from unittest.mock import patch, mock_open, Mock
 
 from xdrone.safety_checker.collision_checker import CollisionChecker
 from xdrone.shared.collision_config import CollisionConfig
@@ -137,3 +138,42 @@ class CollisionCheckerTest(unittest.TestCase):
             self.collision_checker.check(drone_commands, self.state_updater_map)
         self.assertTrue("Collisions might happen!\nCollision might happen between DRONE1 and DRONE2"
                         in str(context.exception))
+
+    @patch('xdrone.safety_checker.collision_checker.CollisionLogSaver.save_check_log')
+    def test_check_with_save_log_flag_should_call_log_saver(self, mock_save_check_log):
+        drone_commands = [SingleDroneCommand("DRONE1", Command.takeoff()),
+                          SingleDroneCommand("DRONE1", Command.land())]
+        self.collision_checker.check(drone_commands, self.state_updater_map, save_check_log=True)
+        mock_save_check_log.assert_called()
+
+
+class CollisionLogSaverTest(unittest.TestCase):
+    def setUp(self) -> None:
+        self.collision_config = CollisionConfig(collision_meters=0.3, time_interval_seconds=0.1)
+        self.drone_config_map = {"DRONE1": DroneConfig(init_position=(0, 0, 0), speed_mps=1,
+                                                       rotate_speed_dps=90, takeoff_height_meters=1),
+                                 "DRONE2": DroneConfig(init_position=(1, 0, 0), speed_mps=2,
+                                                       rotate_speed_dps=180, takeoff_height_meters=1)}
+        self.state_updater_map = {"DRONE1": StateUpdater(DroneConfig(init_position=(0, 0, 0), speed_mps=1,
+                                                                     rotate_speed_dps=90, takeoff_height_meters=1)),
+                                  "DRONE2": StateUpdater(DroneConfig(init_position=(1, 0, 0), speed_mps=2,
+                                                                     rotate_speed_dps=180, takeoff_height_meters=1))}
+
+        self.collision_checker = CollisionChecker(self.drone_config_map, self.collision_config)
+
+    @patch('os.path.isdir')
+    @patch('os.path.join')
+    @patch('os.mkdir')
+    @patch('builtins.open', new_callable=mock_open())
+    @patch('matplotlib.pyplot.subplots')
+    def test_save_check_log_should_save_log(self, mock_subplots, mock_open_file, mock_mkdir, mock_join, mock_isdir):
+        drone_commands = [SingleDroneCommand("DRONE1", Command.takeoff()),
+                          SingleDroneCommand("DRONE1", Command.land())]
+        mock_isdir.return_value = False
+        mock_join.return_value = "joined_path"
+        mock_subplots.return_value = (Mock(), Mock())
+
+        self.collision_checker.check(drone_commands, self.state_updater_map, save_check_log=True)
+
+        mock_mkdir.assert_called_with("logs")
+        mock_open_file.assert_called_with("joined_path", "w")
