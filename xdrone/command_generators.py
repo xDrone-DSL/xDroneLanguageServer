@@ -23,7 +23,7 @@ from xdrone.state_updaters.state_updater import StateUpdater
 
 def generate_commands(program, drone_config_map: Dict[str, DroneConfig] = None,
                       boundary_checker: BoundaryChecker = None, collision_checker: CollisionChecker = None,
-                      has_checks: bool = True, save_check_log: bool = False,
+                      has_checks: bool = True, save_report: bool = False,
                       symbol_table: SymbolTable = None, function_table: FunctionTable = None):
     if drone_config_map is None:
         drone_config_map = {"DEFAULT": DefaultDroneConfig()}
@@ -43,7 +43,7 @@ def generate_commands(program, drone_config_map: Dict[str, DroneConfig] = None,
 
     if has_checks:
         boundary_checker.check(drone_commands, state_updater_map)
-        collision_checker.check(drone_commands, state_updater_map, save_check_log)
+        collision_checker.check(drone_commands, state_updater_map, save_report)
 
     return drone_commands
 
@@ -64,10 +64,10 @@ def _parse_program(program):
     return tree
 
 
-def generate_commands_with_config(program, config_json, has_checks, save_check_log):
+def generate_commands_with_config(program, config_json, has_checks, save_report):
     drone_config_map, boundary_config, collision_config = ConfigParser.parse(config_json)
     boundary_checker = BoundaryChecker(boundary_config)
     collision_checker = CollisionChecker(drone_config_map, collision_config)
     generated_commands = generate_commands(program, drone_config_map, boundary_checker, collision_checker,
-                                           has_checks, save_check_log)
+                                           has_checks, save_report)
     return generated_commands, drone_config_map, boundary_config

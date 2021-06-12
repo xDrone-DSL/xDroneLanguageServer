@@ -40,7 +40,7 @@ class CollisionChecker:
 
     def check(self, drone_commands: List[AbstractDroneCommand],
               state_updater_map: Dict[str, StateUpdater],
-              save_check_log: bool = False):
+              save_report: bool = False):
         if len(self.drone_config_map) == 1:
             # no need to check if there is only 1 drone
             return
@@ -55,8 +55,8 @@ class CollisionChecker:
                                    "please retry with a better collision_config. Error: " + str(e))
 
         collisions, time_slice_info = self._get_possible_collisions_and_time_slice_info(drone_trajectory_map)
-        if save_check_log:
-            CollisionLogSaver.save_check_log(time_slice_info)
+        if save_report:
+            CollisionReportSaver.save_check_report(time_slice_info)
         self._check_collisions(collisions)
 
     def _get_possible_collisions_and_time_slice_info(self, drone_trajectory_map: Dict[str, List[StateVariance]]) \
@@ -315,18 +315,18 @@ class CollisionChecker:
         return longest_time_used
 
 
-class CollisionLogSaver:
+class CollisionReportSaver:
     @staticmethod
-    def save_check_log(time_slice_info: List[Tuple[str, str, float, float, float]]):
-        log_dir = "logs"
-        if not os.path.isdir(log_dir):
-            os.mkdir(log_dir)
+    def save_check_report(time_slice_info: List[Tuple[str, str, float, float, float]]):
+        report_dir = "reports"
+        if not os.path.isdir(report_dir):
+            os.mkdir(report_dir)
 
-        file_name = os.path.join(log_dir, "collision check log (all drones).txt")
+        file_name = os.path.join(report_dir, "collision check log (all drones).txt")
 
         with open(file_name, "w") as file:
             sorted_time_slice_info = sorted(time_slice_info, key=lambda elem: elem[2])
-            file.write(tabulate(CollisionLogSaver._format_rows(sorted_time_slice_info),
+            file.write(tabulate(CollisionReportSaver._format_rows(sorted_time_slice_info),
                                 headers=["Drone 1", "Drone 2", "Time", "Distance", "Confidence"],
                                 colalign=("default", "default", "default", "default", "right")))
 
@@ -336,9 +336,9 @@ class CollisionLogSaver:
             filtered_time_slice_info = filter(lambda elem: drone_pair == (elem[0], elem[1]), time_slice_info)
             filtered_time_slice_info = sorted(filtered_time_slice_info, key=lambda elem: elem[2])
 
-            file_name = os.path.join(log_dir, "collision check log ({}-{}).txt".format(drone_pair[0], drone_pair[1]))
+            file_name = os.path.join(report_dir, "collision check log ({}-{}).txt".format(drone_pair[0], drone_pair[1]))
             with open(file_name, "w") as file:
-                file.write(tabulate(CollisionLogSaver._format_rows(filtered_time_slice_info),
+                file.write(tabulate(CollisionReportSaver._format_rows(filtered_time_slice_info),
                                     headers=["Drone 1", "Drone 2", "Time", "Distance", "Confidence"],
                                     colalign=("default", "default", "default", "default", "right")))
 
@@ -350,7 +350,7 @@ class CollisionLogSaver:
             ax.set_ylabel("Probability")
             ax.set_title("Probability of Collision between {} and {}".format(drone_pair[0], drone_pair[1]))
             ax.set_ylim([-0.05, 1.05])
-            fig_name = os.path.join(log_dir, "collision probability ({}-{}).png".format(drone_pair[0], drone_pair[1]))
+            fig_name = os.path.join(report_dir, "collision probability ({}-{}).png".format(drone_pair[0], drone_pair[1]))
             fig.savefig(fig_name)
 
     @staticmethod
