@@ -105,7 +105,7 @@ class CollisionChecker:
                         nc = x ** 2 / variance + y ** 2 / variance + z ** 2 / variance
                         confidence = ncx2.cdf(collision_meters ** 2 / variance, df=3, nc=nc)
 
-                    if confidence >= self.collision_config.confidence_threshold - 1e-5:
+                    if confidence >= self.collision_config.confidence_threshold - 1e-8:
                         collisions.append((name1, name2, state1, state2, mean_distance, confidence))
 
                     time_slice_info.append((name1, name2, time, mean_distance, confidence))
@@ -120,10 +120,9 @@ class CollisionChecker:
                 y = round((state1.y_meters + state2.y_meters) / 2, 2)
                 z = round((state1.z_meters + state2.z_meters) / 2, 2)
                 mean_distance = round(mean_distance, 5)
-                confidence = round(confidence * 100, 5)
                 error_msg += ("Collision might happen between {} and {}, at time {}s, ".format(name1, name2, time) +
-                              "near position (x={}m, y={}m, z={}m), distance={}m, confidence={:.5f}%\n"
-                              .format(x, y, z, mean_distance, confidence))
+                              "near position (x={}m, y={}m, z={}m), distance={}m, confidence={:.3f}%\n"
+                              .format(x, y, z, mean_distance, confidence * 100))
             raise SafetyCheckError(error_msg)
 
     def _update_states_for_abstract_drone_command(self, drone_commands: List[AbstractDroneCommand],
