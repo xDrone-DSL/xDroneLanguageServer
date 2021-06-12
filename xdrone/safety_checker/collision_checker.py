@@ -120,9 +120,9 @@ class CollisionChecker:
                 y = round((state1.y_meters + state2.y_meters) / 2, 2)
                 z = round((state1.z_meters + state2.z_meters) / 2, 2)
                 mean_distance = round(mean_distance, 5)
-                confidence = round(confidence, 5) * 100
+                confidence = round(confidence * 100, 5)
                 error_msg += ("Collision might happen between {} and {}, at time {}s, ".format(name1, name2, time) +
-                              "near position (x={}m, y={}m, z={}m), distance={}m, confidence={}%\n"
+                              "near position (x={}m, y={}m, z={}m), distance={}m, confidence={:.5f}%\n"
                               .format(x, y, z, mean_distance, confidence))
             raise SafetyCheckError(error_msg)
 
@@ -327,8 +327,9 @@ class CollisionLogSaver:
 
         with open(file_name, "w") as file:
             sorted_time_slice_info = sorted(time_slice_info, key=lambda elem: elem[2])
-            file.write(tabulate(sorted_time_slice_info,
-                                headers=["Drone 1", "Drone 2", "Time", "Distance", "Confidence"]))
+            file.write(tabulate(CollisionLogSaver._format_rows(sorted_time_slice_info),
+                                headers=["Drone 1", "Drone 2", "Time", "Distance", "Confidence"],
+                                colalign=("default", "default", "default", "default", "right")))
 
         drone_pairs = sorted(set([(name1, name2) for (name1, name2, _, _, _) in time_slice_info]))
 
@@ -338,8 +339,9 @@ class CollisionLogSaver:
 
             file_name = os.path.join(log_dir, "collision check log ({}-{}).txt".format(drone_pair[0], drone_pair[1]))
             with open(file_name, "w") as file:
-                file.write(tabulate(filtered_time_slice_info,
-                                    headers=["Drone 1", "Drone 2", "Time", "Distance", "Confidence"]))
+                file.write(tabulate(CollisionLogSaver._format_rows(filtered_time_slice_info),
+                                    headers=["Drone 1", "Drone 2", "Time", "Distance", "Confidence"],
+                                    colalign=("default", "default", "default", "default", "right")))
 
             times = [time for (_, _, time, _, _) in filtered_time_slice_info]
             probabilities = [prob for (_, _, _, _, prob) in filtered_time_slice_info]
@@ -351,3 +353,8 @@ class CollisionLogSaver:
             ax.set_ylim([-0.05, 1.05])
             fig_name = os.path.join(log_dir, "collision probability ({}-{}).png".format(drone_pair[0], drone_pair[1]))
             fig.savefig(fig_name)
+
+    @staticmethod
+    def _format_rows(table: List[Tuple[str, str, float, float, float]]) -> List[Tuple[str, str, float, float, str]]:
+        return [(name1, name2, round(time, 3), round(distance, 5), "{:3.3f}%".format(confidence * 100))
+                for (name1, name2, time, distance, confidence) in table]

@@ -77,10 +77,10 @@ class CollisionCheckerTest(unittest.TestCase):
         with self.assertRaises(SafetyCheckError) as context:
             collision_checker.check(drone_commands, self.state_updater_map)
         self.assertTrue("Collision might happen between DRONE1 and DRONE2, at time 2.4s, " +
-                        "near position (x=0.95m, y=0.0m, z=1.0m), distance=0.1m, confidence=99.968%"
+                        "near position (x=0.95m, y=0.0m, z=1.0m), distance=0.1m, confidence=99.96807%"
                         in str(context.exception))
         self.assertTrue("Collision might happen between DRONE1 and DRONE2, at time 2.6s, " +
-                        "near position (x=0.95m, y=0.0m, z=1.0m), distance=0.1m, confidence=99.949%"
+                        "near position (x=0.95m, y=0.0m, z=1.0m), distance=0.1m, confidence=99.94855%"
                         in str(context.exception))
 
     def test_check_with_zero_variance_should_perform_as_determined(self):
@@ -103,10 +103,10 @@ class CollisionCheckerTest(unittest.TestCase):
         with self.assertRaises(SafetyCheckError) as context:
             collision_checker.check(drone_commands, self.state_updater_map)
         self.assertTrue("Collision might happen between DRONE1 and DRONE2, at time 2.2s, " +
-                        "near position (x=0.85m, y=0.0m, z=1.0m), distance=0.3m, confidence=100.0%"
+                        "near position (x=0.85m, y=0.0m, z=1.0m), distance=0.3m, confidence=100.00000%"
                         in str(context.exception))
         self.assertTrue("Collision might happen between DRONE1 and DRONE2, at time 2.8s, " +
-                        "near position (x=0.85m, y=0.0m, z=1.0m), distance=0.3m, confidence=100.0%"
+                        "near position (x=0.85m, y=0.0m, z=1.0m), distance=0.3m, confidence=100.00000%"
                         in str(context.exception))
 
     def test_check_single_drone_command_should_detect_collision_and_give_error(self):
